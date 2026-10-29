@@ -49,7 +49,7 @@ if (DRY) {
   plan(`[dry] Would dest to: ${maestroDest}`);
   // List what would be copied
   if (fs.existsSync(maestroSrc)) {
-    const listedFiles = ["oc.mjs", "bench.mjs", "limits.mjs", "dash-web.mjs", "launch-app.mjs", "brief-template.md", "HUONG-DAN.md", "SKILL.md"];
+    const listedFiles = ["oc.mjs", "bench.mjs", "limits.mjs", "providers.mjs", "dash-web.mjs", "launch-app.mjs", "brief-template.md", "HUONG-DAN.md", "SKILL.md"];
     const blockedNames = new Set(["stats.json", "oc-stable.mjs", "intro-stage", "MAESTRO-PLAN.md", "MORNING-REPORT.md", "V3-PROGRESS.md", "watch.ps1", "run.sh"]);
     const modelsSrc = path.join(maestroSrc, "models.json");
     if (fs.existsSync(modelsSrc)) plan(`[dry] Would copy: models.json`);
@@ -78,7 +78,7 @@ if (DRY) {
     ]);
 
     // Copy listed files from maestroSrc to maestroDest
-    const listedFiles = ["oc.mjs", "bench.mjs", "limits.mjs", "dash-web.mjs", "launch-app.mjs", "brief-template.md", "HUONG-DAN.md", "SKILL.md"];
+    const listedFiles = ["oc.mjs", "bench.mjs", "limits.mjs", "providers.mjs", "dash-web.mjs", "launch-app.mjs", "brief-template.md", "HUONG-DAN.md", "SKILL.md"];
     for (const f of listedFiles) {
       const s = path.join(maestroSrc, f);
       const d = path.join(maestroDest, f);

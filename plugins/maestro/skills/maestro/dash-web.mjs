@@ -14,6 +14,10 @@ import {
   allJobs, allBatches, rateJob, stopJob, rankModels, KINDS, loadModels,
   availableModels, JOBS, OcError, pauseJob, resumeJob, pauseBatch, resumeBatch,
 } from "./oc.mjs";
+import {
+  PROVIDERS, connectedProviders, loadProviderSettings, saveProviderSetting,
+  spentToday, providerOf,
+} from "./providers.mjs";
 
 const SKILL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const STATS_FILE = path.join(process.env.MAESTRO_DATA || SKILL_DIR, "stats.json");
@@ -245,6 +249,35 @@ function getModels() {
   try { data = buildModels(); } catch { data = { now: Date.now(), updated: null, kinds: KINDS, models: [] }; }
   modelsCache = { at: Date.now(), data };
   return data;
+}
+
+// ---------- providers ----------
+function listProviders() {
+  const connectedMap = connectedProviders();
+  const settings = loadProviderSettings();
+  const models = (getModels()?.models) || [];
+  return PROVIDERS.map((p) => {
+    const s = settings.providers?.[p.id] || {};
+    const spent = spentToday(p.id);
+    const modelCount = models.filter((m) => m && m.id && (m.id.startsWith(p.id + "/") || providerOf(m.id) === p.id)).length;
+    return {
+      id: p.id,
+      name: p.name,
+      billing: p.billing,
+      keyUrl: p.keyUrl,
+      connected: connectedMap[p.id] || null,
+      enabled: !!s.enabled,
+      budgetUsd: Number(s.budgetUsd) || 0,
+      spentUsd: Number(spent?.usd) || 0,
+      jobsToday: Number(spent?.jobs) || 0,
+      models: modelCount,
+    };
+  });
+}
+
+function getProviderObject(id) {
+  const list = listProviders();
+  return list.find((p) => p.id === id) || null;
 }
 
 // ---------- timeline ----------
@@ -765,9 +798,37 @@ function errorStatus(e) {
   return 500;
 }
 
+// Dashboard preferences (theme, language, sidebar, refresh...) are kept server-side as well as in localStorage:
+// some browsers clear site data when the window closes, which reset every setting on each launch.
+const PREFS_FILE = path.join(process.env.MAESTRO_DATA || SKILL_DIR, "ui-prefs.json");
+const PREF_KEY_RE = /^oc-[a-z0-9_-]{1,40}$/;
+function loadPrefs() {
+  try { const p = JSON.parse(fs.readFileSync(PREFS_FILE, "utf8")); return p && typeof p === "object" ? p : {}; } catch { return {}; }
+}
+function prefsBootScript() {
+  const json = JSON.stringify(loadPrefs()).replace(/</g, "\\u003c");
+  return "<script>(function(){var P=" + json + ";try{for(var k in P)localStorage.setItem(k,P[k])}catch(e){}" +
+    "window.ocSyncPref=function(k,v){try{fetch('/api/prefs',{method:'POST',headers:{'Content-Type':'application/json','X-OC-Action':'1'}," +
+    "body:JSON.stringify({key:k,value:v})})}catch(e){}}})();</script>";
+}
+
 async function handlePost(req, res, pathname) {
   if (!csrfOk(req)) {
     return sendJSON(res, 403, { ok: false, message: "CSRF check failed: send X-OC-Action: 1 from the dashboard origin" });
+  }
+
+  if (pathname === "/api/prefs") {
+    let body;
+    try { body = JSON.parse((await readBody(req)) || "{}"); } catch { return sendJSON(res, 400, { ok: false, message: "invalid JSON body" }); }
+    const key = body && body.key, value = body && body.value;
+    if (!PREF_KEY_RE.test(String(key)) || key === "oc-notifications" || typeof value !== "string" || value.length > 2000) {
+      return sendJSON(res, 400, { ok: false, message: "invalid preference" });
+    }
+    const prefs = loadPrefs();
+    prefs[key] = value;
+    try { fs.mkdirSync(path.dirname(PREFS_FILE), { recursive: true }); fs.writeFileSync(PREFS_FILE, JSON.stringify(prefs, null, 2)); }
+    catch (e) { return sendJSON(res, 500, { ok: false, message: e.message }); }
+    return sendJSON(res, 200, { ok: true });
   }
 
   let m = /^\/api\/job\/([^/]+)\/stop$/.exec(pathname);
@@ -836,6 +897,48 @@ async function handlePost(req, res, pathname) {
     }
   }
 
+  m = /^\/api\/provider\/([^/]+)\/?$/.exec(pathname);
+  if (m) {
+    const id = safeId(m[1]);
+    if (!id || !PROVIDERS.some((p) => p.id === id)) {
+      return sendJSON(res, 400, { ok: false, error: "unknown or invalid provider" });
+    }
+    let body;
+    try {
+      const raw = await readBody(req);
+      body = raw ? JSON.parse(raw) : null;
+    } catch {
+      return sendJSON(res, 400, { ok: false, error: "invalid JSON body" });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return sendJSON(res, 400, { ok: false, error: "body must be an object" });
+    }
+    const patch = {};
+    if (body.enabled !== undefined) {
+      if (typeof body.enabled !== "boolean") {
+        return sendJSON(res, 400, { ok: false, error: "enabled must be boolean" });
+      }
+      patch.enabled = body.enabled;
+    }
+    if (body.budgetUsd !== undefined) {
+      const b = Number(body.budgetUsd);
+      if (!Number.isFinite(b) || b < 0 || b > 1000) {
+        return sendJSON(res, 400, { ok: false, error: "budget must be 0..1000 USD per day" });
+      }
+      patch.budgetUsd = b;
+    }
+    if (patch.enabled === undefined && patch.budgetUsd === undefined) {
+      return sendJSON(res, 400, { ok: false, error: "no valid fields provided" });
+    }
+    try {
+      saveProviderSetting(id, patch);
+      const updated = getProviderObject(id);
+      return sendJSON(res, 200, updated);
+    } catch (e) {
+      return sendJSON(res, 400, { ok: false, error: e.message });
+    }
+  }
+
   return sendJSON(res, 404, { ok: false, message: "not found" });
 }
 
@@ -873,7 +976,8 @@ const server = http.createServer(async (req, res) => {
     if (pathname === "/app" || pathname === "/index.html") {
       let html;
       try { html = fs.readFileSync(INDEX_FILE, "utf8"); } catch { return sendJSON(res, 500, { error: "web/index.html not found" }); }
-      return sendHTML(res, html);
+      // Restore saved preferences into localStorage before i18n.js / app.js read them.
+      return sendHTML(res, html.replace(/<head>/i, (h) => h + prefsBootScript()));
     }
 
     if (Object.prototype.hasOwnProperty.call(STATIC_FILES, pathname)) {
@@ -903,6 +1007,10 @@ const server = http.createServer(async (req, res) => {
 
     if (pathname === "/api/models") {
       return sendJSON(res, 200, getModels());
+    }
+
+    if (pathname === "/api/providers" || pathname === "/api/providers/") {
+      return sendJSON(res, 200, { providers: listProviders() });
     }
 
     if (pathname === "/api/health") {

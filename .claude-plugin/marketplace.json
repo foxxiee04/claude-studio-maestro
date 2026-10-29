@@ -10,7 +10,7 @@
       "name": "maestro",
       "source": "./plugins/maestro",
       "description": "Claude plans and verifies; coding agents (opencode free models, Antigravity CLI with Gemini, local Ollama, Claude CLI, Codex) do the work. Routes each job to the right model by difficulty, runs jobs in parallel with fallbacks, ranks models from public benchmarks plus hidden tests, and shows everything in a desktop-style dashboard.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "foxxiee"
       },
@@ -21,7 +21,7 @@
       "name": "web-studio",
       "source": "./plugins/web-studio",
       "description": "/web-studio:design-web - crawls real templates from curated sites into a gallery you pick from, turns picks into 3 design directions with live motion, then builds the site (Next.js + shadcn + motion) through Maestro.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "author": {
         "name": "foxxiee"
       },
@@ -31,6 +31,6 @@
   ],
   "metadata": {
     "description": "Maestro (multi-agent AI orchestra: routing, parallel jobs, live dashboard) and Web Studio (pick real templates, design, build beautiful web UIs with motion) for Claude Code.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   }
 }

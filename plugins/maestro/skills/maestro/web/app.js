@@ -55,6 +55,8 @@
   // ---------- storage ----------
   function store(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch { /* private mode */ }
+    // Also saved by the server (see prefsBootScript in dash-web.mjs): survives browsers that clear site data.
+    if (key !== "oc-notifications" && window.ocSyncPref) window.ocSyncPref(key, JSON.stringify(value));
   }
   function load(key, fallback) {
     try {
@@ -291,6 +293,8 @@
     drawer: { id: null, tab: "log", job: null, brief: null, briefId: null },
     drawerNoteDirty: false,
     version: null,
+    providers: null,
+    providersLoaded: false,
   };
   let jobsById = new Map();
   const liveLines = new Map();
@@ -752,9 +756,8 @@
     const box = $("#kpis");
     if (box) {
       const k = m.kpis || {};
-      const max = (S.state && S.state.maxParallel) || 3;
       const cards = [
-        kpiCard(t("kpi.running"), String(k.running || 0) + "<small>/" + max + "</small>", t("kpi.runningSub"), "accent", "running"),
+        kpiCard(t("kpi.running"), String(k.running || 0), t("kpi.runningSub"), "accent", "running"),
         kpiCard(t("kpi.done"), String(k.done || 0), t("kpi.doneSub"), "", "done"),
         kpiCard(t("kpi.failed"), String(k.failed || 0), t("kpi.failedSub"), k.failed ? "bad" : "", "failed"),
         kpiCard(t("kpi.success"), k.successRate == null ? "—" : I18n.dec(k.successRate, 1) + "<small>%</small>", t("kpi.successSub"), "", "successRate"),
@@ -1156,7 +1159,21 @@
   }
 
   // ---------- timeline ----------
-  const TL = { hours: 6, data: null, geom: null, sig: "" };
+  const TL_KEY = "oc-tl-window";
+  const TL = {
+    hours: 6,
+    data: null,
+    geom: null,
+    sig: "",
+    windowHours: 3,
+    windowEnd: null,
+    openLanes: new Set(),
+    showAllLanes: false,
+  };
+  try {
+    const savedWin = Number(load(TL_KEY, 3));
+    if ([1, 3, 6, 12].includes(savedWin)) TL.windowHours = savedWin;
+  } catch { TL.windowHours = 3; }
   function tlHours() {
     if (S.range === "24h") return 24;
     if (S.range === "7d") return 168;
@@ -1206,101 +1223,320 @@
     }
   }
 
+  function updateTimelineControls(now, dataFrom) {
+    const winHours = TL.windowHours || 3;
+    const winSpan = winHours * 3600 * 1000;
+    const winEnd = (TL.windowEnd && TL.windowEnd <= now) ? TL.windowEnd : now;
+    const winStart = winEnd - winSpan;
+
+    // Segmented buttons
+    $$("#tlWinSeg button").forEach((b) => {
+      const h = Number(b.dataset.hours);
+      const active = h === winHours;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+
+    // Date/time label format: "08:00 – 11:00 · 29/10"
+    const lblEl = $("#tlLabel");
+    if (lblEl) {
+      const d = new Date(winStart);
+      const dateStr = pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1);
+      lblEl.textContent = hhmm(winStart) + " – " + hhmm(winEnd) + " · " + dateStr;
+    }
+
+    // Prev / Next button states
+    const prevBtn = $("#tlPrev");
+    const nextBtn = $("#tlNext");
+    const latestBtn = $("#tlLatest");
+    if (nextBtn) {
+      nextBtn.disabled = winEnd >= now - 1000;
+    }
+    if (prevBtn) {
+      prevBtn.disabled = dataFrom != null && winStart <= dataFrom;
+    }
+    if (latestBtn) {
+      latestBtn.disabled = winEnd >= now - 1000;
+    }
+  }
+
   function renderTimeline() {
     const wrap = $("#ganttWrap");
     if (!wrap) return;
     const d = TL.data;
     const countEl = $("#tlCount");
+    const now = Date.now();
+    const dataFrom = d ? Number(d.from) || (now - (Number(d.hours) || TL.hours) * 3600 * 1000) : now - TL.hours * 3600 * 1000;
+
+    // Ensure valid windowEnd
+    const winHours = TL.windowHours || 3;
+    const winSpan = winHours * 3600 * 1000;
+    if (!TL.windowEnd || TL.windowEnd > now) {
+      TL.windowEnd = now;
+    } else if (TL.windowEnd - winSpan < dataFrom) {
+      TL.windowEnd = Math.min(now, dataFrom + winSpan);
+    }
+    // If windowEnd is at now, keep it tracking now
+    const atLatest = TL.windowEnd >= now - 1500;
+    const curEnd = atLatest ? now : TL.windowEnd;
+    const curStart = curEnd - winSpan;
+
+    updateTimelineControls(now, dataFrom);
+
     if (!d || !Array.isArray(d.jobs) || !d.jobs.length) {
       wrap.innerHTML = '<div class="empty">' + esc(t("timeline.empty", { hours: TL.hours })) + "</div>";
       if (countEl) countEl.textContent = "";
       TL.geom = null;
       return;
     }
-    if (countEl) countEl.textContent = t("timeline.jobs", { n: d.jobs.length });
 
-    const hours = Number(d.hours) || TL.hours;
-    const from = Number(d.from) || (Date.now() - hours * 3600 * 1000);
-    const now = Number(d.now) || Date.now();
-    const span = Math.max(1, (now - from) * 1.02);
-    TL.geom = { from, span };
+    // Filter jobs overlapping the current window: [curStart, curEnd]
+    const windowJobs = d.jobs.filter((j) => {
+      const st = Number(j.startedAt) || 0;
+      const running = j.status === "running";
+      const en = running ? now : (Number(j.endedAt) || now);
+      return st <= curEnd && en >= curStart;
+    });
 
-    const pxPerHour = hours <= 1 ? 340 : hours <= 8 ? 180 : hours <= 30 ? 110 : 46;
-    const chartW = Math.max(560, Math.round(hours * pxPerHour));
+    if (countEl) countEl.textContent = t("timeline.jobs", { n: windowJobs.length });
 
+    // Empty window state
+    if (!windowJobs.length) {
+      // Find nearest earlier window that has jobs
+      let earlierJob = null;
+      for (const j of d.jobs) {
+        const en = j.status === "running" ? now : (Number(j.endedAt) || now);
+        if (en < curStart) {
+          if (!earlierJob) earlierJob = j;
+          else {
+            const curJobEn = earlierJob.status === "running" ? now : (Number(earlierJob.endedAt) || now);
+            if (en > curJobEn) earlierJob = j;
+          }
+        }
+      }
+
+      let jumpBtnHtml = "";
+      if (earlierJob) {
+        const targetEn = earlierJob.status === "running" ? now : (Number(earlierJob.endedAt) || now);
+        const targetEnd = Math.min(now, Math.max(dataFrom + winSpan, targetEn + winSpan * 0.2));
+        jumpBtnHtml = '<button type="button" class="tl-jump-btn" id="tlJumpEarlier" data-target="' + targetEnd + '">' +
+          esc(t("timeline.jumpEarlier")) + '</button>';
+      }
+
+      wrap.innerHTML = '<div class="empty tl-empty-box">' +
+        '<span>' + esc(t("timeline.emptyWindow")) + '</span>' +
+        jumpBtnHtml +
+      '</div>';
+      TL.geom = { from: curStart, span: winSpan };
+      return;
+    }
+
+    // Geometry is based on the active window
+    TL.geom = { from: curStart, span: winSpan };
+
+    // Group jobs by project
     const groups = new Map();
-    for (const j of d.jobs) {
+    for (const j of windowJobs) {
       const key = j.project || t("common.unknown");
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(j);
     }
 
-    const nowPct = Math.max(0, Math.min(100, ((now - from) / span) * 100));
-    const stepMin = hours <= 1 ? 10 : hours <= 8 ? 60 : hours <= 30 ? 120 : 720;
+    // Sort lanes by latest activity in the window (max of startedAt or endedAt)
+    const sortedLanes = [...groups.entries()].sort((a, b) => {
+      const maxActA = Math.max(...a[1].map((j) => (j.status === "running" ? now : (Number(j.endedAt) || Number(j.startedAt) || 0))));
+      const maxActB = Math.max(...b[1].map((j) => (j.status === "running" ? now : (Number(j.endedAt) || Number(j.startedAt) || 0))));
+      return maxActB - maxActA;
+    });
+
+    const totalLanes = sortedLanes.length;
+    const visibleLanes = TL.showAllLanes ? sortedLanes : sortedLanes.slice(0, 8);
+    const hiddenLaneCount = totalLanes - visibleLanes.length;
+
+    // Ticks: 10 min (1h), 30 min (3h), 1 h (6h), 2 h (12h)
+    const stepMin = winHours === 1 ? 10 : winHours === 3 ? 30 : winHours === 6 ? 60 : 120;
     const stepMs = stepMin * 60000;
-    let tickAt = Math.ceil(from / stepMs) * stepMs;
+    let tickAt = Math.ceil(curStart / stepMs) * stepMs;
     const ticks = [];
-    while (tickAt <= from + span && ticks.length < 220) {
+    while (tickAt <= curEnd && ticks.length < 220) {
       ticks.push(tickAt);
       tickAt += stepMs;
     }
-    const axisHtml = ticks.map((t) => {
-      const left = ((t - from) / span) * 100;
-      const lbl = hours > 30 ? pad2(new Date(t).getDate()) + "/" + pad2(new Date(t).getMonth() + 1) + " " + hhmm(t) : hhmm(t);
-      return '<div class="tick" style="left:' + left.toFixed(2) + '%">' + lbl + "</div>";
-    }).join("") +
-      '<div class="gnow" style="left:' + nowPct.toFixed(2) + '%"></div>' +
-      '<div class="gnow-label" id="gNowLabel" style="left:' + nowPct.toFixed(2) + '%">' + esc(t("timeline.now")) + "</div>";
 
-    const lanesHtml = [...groups.entries()].map(([project, list]) => {
+    const nowPct = ((now - curStart) / winSpan) * 100;
+    const nowInWindow = now >= curStart && now <= curEnd;
+
+    const axisHtml = ticks.map((t) => {
+      const left = ((t - curStart) / winSpan) * 100;
+      return '<div class="tick" style="left:' + left.toFixed(2) + '%">' + hhmm(t) + "</div>";
+    }).join("") +
+      (nowInWindow ? (
+        '<div class="gnow" style="left:' + nowPct.toFixed(2) + '%"></div>' +
+        '<div class="gnow-label" id="gNowLabel" style="left:' + nowPct.toFixed(2) + '%">' + esc(t("timeline.now")) + "</div>"
+      ) : "");
+
+    const wrapWidth = wrap.clientWidth || 800;
+    const trackWidth = Math.max(200, wrapWidth - 190);
+
+    const lanesHtml = visibleLanes.map(([project, list]) => {
       const { placed, rows } = layoutLane(list);
-       const laneH = Math.max(34, rows * 24 + 4);
-      const bars = placed.map(({ j, row }) => {
-        const st = Math.max(Number(j.startedAt) || from, from);
-        const running = j.status === "running";
-        const rawEnd = running ? now : Math.min(Number(j.endedAt) || now, from + span);
-        const left = Math.max(0, Math.min(100, ((st - from) / span) * 100));
-        const width = Math.max(0.5, Math.min(100 - left, ((rawEnd - st) / span) * 100));
-        return '<button type="button" class="gbar s-' + statusClass(j.status) + (running ? " live" : "") + '"' +
-           ' style="left:' + left.toFixed(2) + "%;width:" + width.toFixed(2) + "%;top:" + (row * 24 + 4) + 'px"' +
-          ' data-id="' + esc(j.id) + '" data-name="' + esc(j.name) + '" data-model="' + esc(shortModel(j.model)) + '"' +
-          ' data-status="' + esc(statusLabel(j.status)) + '" data-gstart="' + st + '" data-gend="' + (Number(j.endedAt) || 0) + '"' +
-          ' data-tokens="' + (Number(j.tokens) || 0) + '" data-live="' + (running ? "1" : "0") + '">' +
-          '<span class="gbar-t">' + esc(j.name) + "</span></button>";
-      }).join("");
+      const isOpen = TL.openLanes.has(project);
+      const isCapped = !isOpen && rows > 4;
+      const displayRows = isCapped ? 4 : rows;
+      const laneH = Math.max(34, displayRows * 24 + 4);
+
+      // Count overflow jobs if capped
+      let overflowCount = 0;
+      if (isCapped) {
+        overflowCount = placed.filter((p) => p.row >= 4).length;
+      }
+
+      const bars = placed
+        .filter(({ row }) => !isCapped || row < 4)
+        .map(({ j, row }) => {
+          const rawSt = Number(j.startedAt) || curStart;
+          const running = j.status === "running";
+          const rawEnd = running ? now : (Number(j.endedAt) || now);
+
+          // Clamped to window
+          const st = Math.max(rawSt, curStart);
+          const en = Math.min(rawEnd, curEnd);
+          const left = Math.max(0, Math.min(100, ((st - curStart) / winSpan) * 100));
+          const width = Math.max(0.2, Math.min(100 - left, ((en - st) / winSpan) * 100));
+
+          const barPx = (width / 100) * trackWidth;
+          const showName = barPx >= 70;
+
+          return '<button type="button" class="gbar s-' + statusClass(j.status) + (running ? " live" : "") + '"' +
+            ' style="left:' + left.toFixed(2) + "%;width:" + width.toFixed(2) + "%;top:" + (row * 24 + 4) + 'px"' +
+            ' data-id="' + esc(j.id) + '" data-name="' + esc(j.name) + '" data-model="' + esc(shortModel(j.model)) + '"' +
+            ' data-status="' + esc(statusLabel(j.status)) + '" data-gstart="' + rawSt + '" data-gend="' + (Number(j.endedAt) || 0) + '"' +
+            ' data-tokens="' + (Number(j.tokens) || 0) + '" data-live="' + (running ? "1" : "0") + '">' +
+            (showName ? '<span class="gbar-t">' + esc(j.name) + "</span>" : "") +
+            "</button>";
+        }).join("");
+
+      let chipHtml = "";
+      if (rows > 4) {
+        const chipLabel = isOpen ? "▲" : esc(t("timeline.moreRows", { n: overflowCount }));
+        const chipTitle = isOpen ? esc(t("timeline.lessRowsTitle")) : esc(t("timeline.moreRowsTitle"));
+        chipHtml = '<button type="button" class="tl-more-chip' + (isOpen ? " is-open" : "") + '" data-project="' + esc(project) + '" title="' + chipTitle + '">' +
+          chipLabel + '</button>';
+      }
+
       return '<div class="grow lane">' +
-        '<div class="glabel"><span class="lane-name" title="' + esc(project) + '">' + esc(project) + "</span>" +
-           '<span class="lane-count">' + esc(t("timeline.laneCount", { n: list.length })) + "</span></div>" +
+        '<div class="glabel">' +
+          '<span class="lane-name" title="' + esc(project) + '">' + esc(project) + "</span>" +
+          '<div class="glabel-meta">' +
+            '<span class="lane-count">' + esc(t("timeline.laneCount", { n: list.length })) + "</span>" +
+            chipHtml +
+          "</div>" +
+        "</div>" +
         '<div class="gtrack" style="height:' + laneH + 'px">' + bars +
-          '<div class="gnow" style="left:' + nowPct.toFixed(2) + '%"></div></div>' +
+          (nowInWindow ? '<div class="gnow" style="left:' + nowPct.toFixed(2) + '%"></div>' : "") +
+        "</div>" +
       "</div>";
     }).join("");
 
-    wrap.innerHTML = '<div class="gantt-scroll"><div class="gantt-grid" style="--chartw:' + chartW + 'px">' +
+    let moreLanesBtnHtml = "";
+    if (hiddenLaneCount > 0) {
+      moreLanesBtnHtml = '<button type="button" class="tl-more-lanes" id="tlMoreLanes" data-act="more">' +
+        esc(t("timeline.showMoreProjects", { n: hiddenLaneCount })) + '</button>';
+    } else if (TL.showAllLanes && totalLanes > 8) {
+      moreLanesBtnHtml = '<button type="button" class="tl-more-lanes" id="tlMoreLanes" data-act="fewer">' +
+        esc(t("timeline.showFewerProjects")) + '</button>';
+    }
+
+    wrap.innerHTML = '<div class="gantt-scroll"><div class="gantt-grid">' +
       '<div class="grow head"><div class="glabel">' + esc(t("timeline.project")) + '</div><div class="gtrack axis">' + axisHtml + "</div></div>" +
       lanesHtml +
-    "</div></div>";
+    "</div></div>" + moreLanesBtnHtml;
   }
-
   function tickGantt() {
     if (S.view !== "timeline" || !TL.geom) return;
     const { from, span } = TL.geom;
     const now = Date.now();
+    const to = from + span;
+    const inWindow = now >= from && now <= to;
+
     $$('.gbar[data-live="1"]').forEach((el) => {
-      const st = Number(el.dataset.gstart) || now;
+      const rawSt = Number(el.dataset.gstart) || now;
+      const st = Math.max(rawSt, from);
+      const en = Math.min(now, to);
+      if (en < from || st > to) {
+        el.style.display = "none";
+        return;
+      }
+      el.style.display = "";
       const left = Math.max(0, ((st - from) / span) * 100);
-      const width = Math.max(0.5, Math.min(100 - left, ((now - st) / span) * 100));
+      const width = Math.max(0.2, Math.min(100 - left, ((en - st) / span) * 100));
+      el.style.left = left.toFixed(2) + "%";
       el.style.width = width.toFixed(2) + "%";
     });
+
     const pct = Math.max(0, Math.min(100, ((now - from) / span) * 100)).toFixed(2);
-    $$(".gnow").forEach((el) => { el.style.left = pct + "%"; });
+    $$(".gnow").forEach((el) => {
+      el.style.display = inWindow ? "" : "none";
+      el.style.left = pct + "%";
+    });
     const lbl = $("#gNowLabel");
-    if (lbl) lbl.style.left = pct + "%";
+    if (lbl) {
+      lbl.style.display = inWindow ? "" : "none";
+      lbl.style.left = pct + "%";
+    }
   }
   setInterval(tickGantt, 1000);
 
   let ganttWired = false;
   function wireGantt() {
+    const winSeg = $("#tlWinSeg");
+    if (winSeg) {
+      winSeg.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-hours]");
+        if (!b) return;
+        const h = Number(b.dataset.hours);
+        if (![1, 3, 6, 12].includes(h)) return;
+        TL.windowHours = h;
+        store(TL_KEY, h);
+        renderTimeline();
+      });
+    }
+
+    const prevBtn = $("#tlPrev");
+    if (prevBtn) {
+      prevBtn.addEventListener("click", () => {
+        const now = Date.now();
+        const winSpan = (TL.windowHours || 3) * 3600 * 1000;
+        const curEnd = TL.windowEnd || now;
+        const d = TL.data;
+        const dataFrom = d ? Number(d.from) || (now - (Number(d.hours) || TL.hours) * 3600 * 1000) : now - TL.hours * 3600 * 1000;
+        TL.windowEnd = Math.max(dataFrom + winSpan, curEnd - winSpan);
+        renderTimeline();
+      });
+    }
+
+    const nextBtn = $("#tlNext");
+    if (nextBtn) {
+      nextBtn.addEventListener("click", () => {
+        const now = Date.now();
+        const winSpan = (TL.windowHours || 3) * 3600 * 1000;
+        const curEnd = TL.windowEnd || now;
+        TL.windowEnd = Math.min(now, curEnd + winSpan);
+        renderTimeline();
+      });
+    }
+
+    const latestBtn = $("#tlLatest");
+    if (latestBtn) {
+      latestBtn.addEventListener("click", () => {
+        TL.windowEnd = Date.now();
+        renderTimeline();
+      });
+    }
+
+    window.addEventListener("resize", () => {
+      if (S.view === "timeline" && TL.data) renderTimeline();
+    });
     const wrap = $("#ganttWrap");
     if (!wrap || ganttWired) return;
     ganttWired = true;
@@ -1325,10 +1561,36 @@
     });
     wrap.addEventListener("mouseleave", () => { if (tip) tip.hidden = true; });
     wrap.addEventListener("click", (e) => {
+      // Toggle lane open/close
+      const chip = e.target.closest(".tl-more-chip");
+      if (chip && chip.dataset.project) {
+        const proj = chip.dataset.project;
+        if (TL.openLanes.has(proj)) TL.openLanes.delete(proj);
+        else TL.openLanes.add(proj);
+        renderTimeline();
+        return;
+      }
+
+      // Show more / fewer projects
+      const moreBtn = e.target.closest("#tlMoreLanes");
+      if (moreBtn) {
+        TL.showAllLanes = moreBtn.dataset.act === "more";
+        renderTimeline();
+        return;
+      }
+
+      // Jump to earlier window
+      const jumpBtn = e.target.closest("#tlJumpEarlier");
+      if (jumpBtn && jumpBtn.dataset.target) {
+        TL.windowEnd = Number(jumpBtn.dataset.target) || Date.now();
+        renderTimeline();
+        return;
+      }
       const bar = e.target.closest(".gbar");
       if (bar && bar.dataset.id) {
         if (tip) tip.hidden = true;
         openDrawer(bar.dataset.id);
+
       }
     });
   }
@@ -1859,6 +2121,220 @@
     if (pt) { const on = S.theme === "dark"; pt.classList.toggle("on", on); pt.setAttribute("aria-checked", on ? "true" : "false"); }
   }
 
+  // ---------- providers ----------
+  let showAllNotConnected = false;
+  const providerInFlight = new Set();
+
+  async function copyProviderCmd(id) {
+    const cmd = "maestro keys add " + id;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(cmd);
+      } else {
+        throw new Error("clipboard unavailable");
+      }
+      toast(t("providers.copiedToast", { cmd }), "ok");
+    } catch {
+      const ta = document.createElement("textarea");
+      ta.value = cmd;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        toast(t("providers.copiedToast", { cmd }), "ok");
+      } catch {
+        toast(t("providers.copyFailed"), "bad");
+      }
+      ta.remove();
+    }
+  }
+
+  async function loadProviders() {
+    const listEl = $("#providersList");
+    if (!listEl) return;
+    try {
+      const res = await fetch("/api/providers", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      const data = await res.json();
+      S.providers = Array.isArray(data && data.providers) ? data.providers : [];
+      S.providersLoaded = true;
+      renderProviders();
+    } catch (e) {
+      if (!S.providersLoaded) {
+        listEl.innerHTML = '<div class="empty">' + esc(t("common.unknown")) + '</div>';
+      }
+    }
+  }
+
+  async function updateProvider(id, patch) {
+    if (!id || providerInFlight.has(id)) return;
+    providerInFlight.add(id);
+    try {
+      await postAction("/api/provider/" + encodeURIComponent(id), patch);
+      toast(t("providers.updated"), "ok");
+    } catch (e) {
+      toast(t("providers.updateFailed", { msg: e.message }), "bad");
+    } finally {
+      providerInFlight.delete(id);
+      await loadProviders();
+    }
+  }
+
+  function renderProviderRow(p) {
+    const isConn = !!p.connected;
+    const isPaid = p.billing === "paid";
+    const isEnabled = !!p.enabled;
+    const budget = Number(p.budgetUsd) || 0;
+    const spentUsd = Number(p.spentUsd) || 0;
+    const jobsToday = Number(p.jobsToday) || 0;
+    const showWarn = isPaid && isEnabled && budget <= 0;
+
+    const connBadge = isConn
+      ? '<span class="prov-badge connected">' + esc(t("providers.connected")) + '</span>'
+      : '<span class="prov-badge unconnected">' + esc(t("providers.notConnected")) + '</span>';
+
+    const billingBadge = isPaid
+      ? '<span class="prov-badge paid">' + esc(t("providers.paid")) + '</span>'
+      : '<span class="prov-badge free">' + esc(t("providers.freeTier")) + '</span>';
+
+    const keyLink = p.keyUrl
+      ? '<a href="' + esc(p.keyUrl) + '" target="_blank" rel="noopener" class="prov-key-link">' + esc(t("providers.getKey")) + ' ↗</a>'
+      : "";
+
+    const copyBtn = !isConn
+      ? '<button type="button" class="prov-copy-btn" data-copy-provider="' + esc(p.id) + '" title="' + esc(t("providers.copyCmd")) + '">' +
+          '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>' +
+          '<span>maestro keys add ' + esc(p.id) + '</span>' +
+        '</button>'
+      : "";
+
+    const switchBtn = isConn
+      ? '<button class="switch ' + (isEnabled ? "on" : "") + '" type="button" role="switch" aria-checked="' + (isEnabled ? "true" : "false") + '" data-switch-provider="' + esc(p.id) + '">' +
+          '<i></i><span>' + esc(t(isEnabled ? "common.on" : "common.off")) + '</span>' +
+        '</button>'
+      : '<button class="switch disabled" type="button" role="switch" aria-checked="false" disabled aria-disabled="true" data-switch-provider="' + esc(p.id) + '">' +
+          '<i></i><span>' + esc(t("common.off")) + '</span>' +
+        '</button>';
+
+    const todayKey = (window.I18n && window.I18n.lang === "en" && jobsToday === 1) ? "providers.todaySpendOne" : "providers.todaySpend";
+    const todayText = t(todayKey, { cost: spentUsd.toFixed(2), jobs: jobsToday });
+
+    const budgetInput = isPaid
+      ? '<label class="prov-budget-wrap">' +
+          '<span class="prov-budget-label">' + esc(t("providers.budgetDaily")) + '</span>' +
+          '<input type="number" step="0.5" min="0" class="prov-budget-input" value="' + budget + '" data-budget-provider="' + esc(p.id) + '"' + (!isConn ? ' disabled' : '') + '>' +
+        '</label>'
+      : "";
+
+    const warnLine = showWarn
+      ? '<div class="prov-warn-line">' +
+          '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>' +
+          '<span>' + esc(t("providers.warnBudget")) + '</span>' +
+        '</div>'
+      : "";
+
+    return '<div class="prov-row' + (!isConn ? ' unconnected' : '') + '" data-provider-row="' + esc(p.id) + '">' +
+      '<div class="prov-top">' +
+        '<div class="prov-info">' +
+          '<span class="prov-name">' + esc(p.name) + '</span>' +
+          connBadge +
+          billingBadge +
+          keyLink +
+          copyBtn +
+        '</div>' +
+        '<div class="prov-switch-wrap">' + switchBtn + '</div>' +
+      '</div>' +
+      '<div class="prov-bottom">' +
+        '<span class="prov-spend">' + esc(todayText) + '</span>' +
+        (budgetInput ? '<div class="prov-budget-container">' + budgetInput + '</div>' : '') +
+      '</div>' +
+      warnLine +
+    '</div>';
+  }
+
+  function renderProviders() {
+    const listEl = $("#providersList");
+    if (!listEl) return;
+    const introEl = $("#providersIntro");
+    if (introEl) {
+      introEl.innerHTML = esc(t("providers.introPre")) + ' <code>' + esc(t("providers.introCmd")) + '</code>' + esc(t("providers.introPost"));
+    }
+
+    const providers = S.providers || [];
+    if (!providers.length) {
+      listEl.innerHTML = '<div class="empty">' + esc(t("providers.empty")) + '</div>';
+      return;
+    }
+
+    const connected = providers.filter((p) => !!p.connected);
+    const notConnected = providers.filter((p) => !p.connected);
+
+    const canCollapse = notConnected.length > 4;
+    const visibleNotConnected = (canCollapse && !showAllNotConnected)
+      ? notConnected.slice(0, 4)
+      : notConnected;
+
+    const listHtml = [...connected, ...visibleNotConnected].map(renderProviderRow).join("");
+
+    let toggleHtml = "";
+    if (canCollapse) {
+      if (!showAllNotConnected) {
+        toggleHtml = '<div class="prov-show-all-wrap"><button type="button" class="prov-show-all-btn" id="provShowAllBtn">' +
+          esc(t("providers.showAll", { n: notConnected.length })) + '</button></div>';
+      } else {
+        toggleHtml = '<div class="prov-show-all-wrap"><button type="button" class="prov-show-all-btn" id="provShowLessBtn">' +
+          esc(t("providers.showLess")) + '</button></div>';
+      }
+    }
+
+    listEl.innerHTML = listHtml + toggleHtml;
+
+    $$("button[data-copy-provider]", listEl).forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        copyProviderCmd(btn.dataset.copyProvider);
+      });
+    });
+
+    $$("button[data-switch-provider]", listEl).forEach((btn) => {
+      if (btn.disabled) return;
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        const id = btn.dataset.switchProvider;
+        const p = (S.providers || []).find((x) => x.id === id);
+        if (!p) return;
+        await updateProvider(id, { enabled: !p.enabled });
+      });
+    });
+
+    $$("input[data-budget-provider]", listEl).forEach((inp) => {
+      inp.addEventListener("change", async () => {
+        const id = inp.dataset.budgetProvider;
+        const raw = parseFloat(inp.value);
+        const val = Number.isFinite(raw) && raw >= 0 ? Math.round(raw * 100) / 100 : 0;
+        inp.value = val;
+        await updateProvider(id, { budgetUsd: val });
+      });
+    });
+
+    const showAllBtn = $("#provShowAllBtn", listEl);
+    if (showAllBtn) {
+      showAllBtn.addEventListener("click", () => {
+        showAllNotConnected = true;
+        renderProviders();
+      });
+    }
+    const showLessBtn = $("#provShowLessBtn", listEl);
+    if (showLessBtn) {
+      showLessBtn.addEventListener("click", () => {
+        showAllNotConnected = false;
+        renderProviders();
+      });
+    }
+  }
+
   async function refreshSettingsView() {
     try {
        const h = S.health || {};
@@ -1903,6 +2379,7 @@
             '</div>';
         }).join("");
       }
+      await loadProviders();
     } catch { /* visual-only, never throw */ }
   }
 

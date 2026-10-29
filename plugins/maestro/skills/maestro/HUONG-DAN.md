@@ -34,8 +34,10 @@ Trong app Claude, Claude cũng mở tab "opencode jobs" ở **Terminal panel** (
 - Mỗi job có một **kind**: `quick` (sửa nhỏ, ưu tiên nhanh), `code` (logic), `ui` (giao diện React/motion), `hard` (khó, nhiều file).
 - `oc` tự chọn model tốt nhất theo kind và giữ sẵn 2 model dự phòng. Model miễn phí sập thì tự chuyển sang model
   khác (chỉ khi chưa sửa file nào), và model vừa sập sẽ bị bỏ qua trong 30 phút.
-- Điểm của model = kết quả **benchmark có test ẩn** × độ ổn định thực tế, cộng với đánh giá good/bad mà Claude chấm
-  sau khi kiểm tra từng job (`oc rate`). Càng dùng thì việc chọn model càng chính xác.
+- Điểm chất lượng của model = **số liệu benchmark công khai** (SWE-bench, DeepSWE, Terminal-Bench) trộn với
+  **benchmark có test ẩn** của Maestro, nhân độ ổn định thực tế, cộng đánh giá good/bad mà Claude chấm sau mỗi job
+  (`oc rate`). Model mới (ví dụ vừa gắn key) được xếp ngay theo số liệu công khai của dòng model đó.
+- Mỗi model có **mức năng lực 1-5**: việc `hard` cần mức 4+, `code`/`ui` 3+, `quick` 2+.
 
 | Lệnh | Tác dụng |
 |---|---|
@@ -47,7 +49,22 @@ Trong app Claude, Claude cũng mở tab "opencode jobs" ở **Terminal panel** (
 Benchmark gồm 3 bài, chấm bằng test ẩn mà model không thấy: **fix** (sửa 4 bug cho test qua), **code** (viết 3 hàm
 theo spec, 24 kiểm tra), **ui** (component React + TypeScript + motion, kiểm tra type + render).
 
-Muốn dùng model trả phí (Claude, GPT...): chạy `opencode auth login`, sau đó `oc bench <tên model>`.
+## Gắn API key (OpenAI, OpenRouter, Groq, ...)
+
+Key do opencode cất giữ; Maestro không đọc, không lưu key, chỉ biết nhà cung cấp nào đã gắn.
+
+| Lệnh | Tác dụng |
+|---|---|
+| `maestro keys` | Danh sách nhà cung cấp: đã gắn key chưa, bật/tắt, loại (trả phí / có gói miễn phí), ngân sách, đã dùng hôm nay |
+| `maestro keys add openrouter` | Gắn key (opencode hỏi key, mở trang lấy key ở cột link) |
+| `maestro keys enable openrouter --budget 2` | Bật nhà cung cấp, ngân sách 2 USD/ngày |
+| `maestro keys budget openai 5` | Đổi ngân sách/ngày |
+| `maestro keys disable groq` / `maestro keys remove groq` | Tắt / gỡ key |
+
+- Nhà cung cấp mới gắn mặc định **tắt**; bật trong `maestro keys enable` hoặc Cài đặt > Nhà cung cấp trên dashboard.
+- Nhà cung cấp **trả phí** chỉ được dùng khi job có `--paid` (batch `"paid": true`) **và** đã đặt ngân sách; dùng
+  hết ngân sách trong ngày thì Maestro tự bỏ qua tới hôm sau. Model `:free` của OpenRouter không tính tiền.
+- Nhà cung cấp **có gói miễn phí** (Google AI Studio, Groq, Cerebras) khi bật thì tham gia chọn tự động như model miễn phí.
 
 ## An toàn
 

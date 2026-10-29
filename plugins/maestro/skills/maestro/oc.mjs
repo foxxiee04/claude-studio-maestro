@@ -30,6 +30,8 @@ import path from "node:path";
 import readline from "node:readline";
 import { fileURLToPath } from "node:url";
 import { canStart, modelHeadroom, machineLimits } from "./limits.mjs";
+import { PROVIDERS, providerOf, providerInfo, connectedProviders, loadProviderSettings, saveProviderSetting, isPaidModel,
+  addSpend, spentToday, providerBlock, familyPrior, levelFromQuality } from "./providers.mjs";
 
 const SKILL_DIR = path.dirname(fileURLToPath(import.meta.url));
 const JOBS = process.env.OC_JOBS_DIR || path.join(os.tmpdir(), "opencode-jobs");
@@ -76,7 +78,9 @@ function modelLevel(model) {
   if (m.startsWith("ollama/")) return 2;
   // unknown opencode models = 3, unknown ollama = 2
   if (m.startsWith("opencode/")) return 3;
-  return 3;
+  // Models added with an API key: level from the public-benchmark prior of their family.
+  const prior = familyPrior(m);
+  return prior === null ? 3 : levelFromQuality(prior);
 }
 // Failures that say nothing about the model's skill: dead endpoint, rate limit, network, overload.
 const INFRA_RE = /upstream|unavailable|stream ended after|rate.?limit|too many requests|\b429\b|\b50[234]\b|overloaded|quota|ECONNRESET|ETIMEDOUT|fetch failed|socket hang up/i;
@@ -195,6 +199,7 @@ export function modelTier(id) {
   // Antigravity's free quota is generous only for Gemini; its Claude / GPT-OSS models run out fast, so they count
   // as "paid": used only with --paid (or when named with --model).
   if (s.startsWith("antigravity/") && !s.startsWith("antigravity/gemini-")) return "paid";
+  if (isPaidModel(s)) return "paid"; // the user's own API key (OpenAI, OpenRouter paid models, ...)
   return s.startsWith("claude/") || s.startsWith("codex/") ? "paid" : "free";
 }
 export function modelRunner(id) {
@@ -313,6 +318,7 @@ function modelScore(model, kind, db, stats) {
   // our small bench saturates (many models score 100%), so research separates strong from adequate models.
   const research = db.models[model]?.research?.quality;
   if (typeof research === "number") quality = quality === null ? research : (quality + research) / 2;
+  if (quality === null && !bench.smoke) quality = familyPrior(model);
   // Only a smoke result: weak signal. Passing ranks just above untested, failing (dead endpoint) drops out.
   if (quality === null && bench.smoke) quality = bench.smoke.score ? 0.4 : 0;
   const secs = tasks.length ? avg(tasks.map((t) => bench[t].seconds || 0)) : 300;
@@ -369,6 +375,7 @@ function rankedModels(kind, { allowPaid = false, excludeCodex = true, excludeCla
   const cQuota = claudeQuota();
   return rankModels(kind).filter((r) => {
     if (!(r.quality === null || r.quality > 0) || isDead(r.model, stats)) return false;
+    if (providerBlock(r.model)) return false;
     if (!allowPaid && modelTier(r.model) !== "free") return false;
     if (excludeCodex && quota.blocked && r.model.startsWith("codex/")) return false;
     if (excludeClaude && cQuota.blocked && r.model.startsWith("claude/")) return false;
@@ -412,6 +419,8 @@ function resolveChain({ model, kind, fallbacks, paid, level }) {
   // Paid models are only ever fallbacks when the job allows them, and then after every free option.
   const rest = (allowPaid ? [...freeRows, ...paidRows] : freeRows).map((r) => r.model);
   if (model && model !== "auto") {
+    const block = providerBlock(model);
+    if (block) throw new OcError(`${model}: ${block}`, 2);
     const next = rest.filter((m) => m !== model).slice(0, n);
     if (isDead(model, stats) && next.length) {
       console.error(`oc: ${model} failed with an endpoint error in the last 30 min; using ${next[0]} (pass --fallbacks 0 to force it)`);
@@ -485,6 +494,8 @@ function pickChain({ model, kind, fallbacks, paid, level }) {
 }
 
 async function recordStats(job) {
+  // Money spent on the user's own API key counts even when the run was stopped or paused.
+  if (providerOf(job.model)) addSpend(job.model, job.cost || 0);
   if (job.status === "stopped") return; // stopped by the user: says nothing about the model
   if (job.pausedMs > 0) return; // a paused run says nothing reliable about the model's speed or stability
   await withLock("stats", () => {
@@ -1043,12 +1054,18 @@ export async function runJob(opts) {
     job = await runAttempt({ ...base, model: chain[i], attempt: i + 1, prev: job });
     attempts.push({ id: job.id, model: job.model, status: job.status, error: job.error ? oneLine(job.error, 160) : null });
     if (!opts.noStats) await recordStats(job);
-    if (job.status === "done" || !isInfraFailure(job) || i === chain.length - 1) break;
+    if (job.status === "done" || !isInfraFailure(job)) break;
     if (isOpencodeQuota(job)) {
-      const rest = chain.slice(i + 1).filter((m) => !m.startsWith("opencode/"));
+      // The shared free quota is gone: drop the other opencode models and, if nothing else is left, re-rank
+      // without them (they are marked dead now) so the job still runs on another runner.
+      let rest = chain.slice(i + 1).filter((m) => !m.startsWith("opencode/"));
+      if (!rest.length) {
+        rest = resolveChain({ kind, fallbacks: Math.max(2, Number(opts.fallbacks ?? DEFAULT_FALLBACKS)), paid: allowsPaid(opts), level: opts.level })
+          .filter((m) => !m.startsWith("opencode/") && !chain.includes(m));
+      }
       chain.splice(i + 1, chain.length, ...rest);
-      if (!rest.length) break;
     }
+    if (i === chain.length - 1) break;
   }
   job.attempts = attempts;
   writeJSON(path.join(JOBS, job.id, "job.json"), job);
@@ -1488,6 +1505,61 @@ async function main() {
         console.log(`${pad(j.id, 38)} ${pad(j.status, 8)} ${pad(dur(t), 7)} ${pad(short(j.model), 28)} ${pad(j.kind || "", 5)} files=${j.filesTouched?.length || 0}${j.outOfScope?.length ? " !scope" : ""}${j.rating ? " " + j.rating : ""}  ${oneLine(j.lastActivity, 50)}`);
       }
       return 0;
+    }
+    case "keys": {
+      // API-key providers. Keys live in opencode's credential store; Maestro only keeps on/off + daily budget.
+      const [sub = "list", id, value] = pos;
+      const cfgAll = () => loadProviderSettings().providers;
+      const need = () => {
+        if (!id || !providerInfo(id)) throw new OcError(`provider: ${PROVIDERS.map((p) => p.id).join(", ")}`, 2);
+        return providerInfo(id);
+      };
+      const refreshModels = () => { try { fs.rmSync(path.join(JOBS, ".models-cache.json"), { force: true }); } catch {} modelCache = null; };
+      if (sub === "list" || sub === "ls") {
+        const conn = connectedProviders(), cfg = cfgAll();
+        const models = availableModels();
+        console.log("provider".padEnd(14) + "key".padEnd(10) + "on".padEnd(5) + "billing".padEnd(11) + "budget/day".padEnd(12) + "today".padEnd(14) + "models");
+        for (const p of PROVIDERS) {
+          const c = cfg[p.id] || {}, sp = spentToday(p.id);
+          const n = models.filter((m) => providerOf(m) === p.id).length;
+          console.log(p.id.padEnd(14) + (conn[p.id] || "-").padEnd(10) + (c.enabled ? "yes" : "no").padEnd(5) + p.billing.padEnd(11) +
+            (p.billing === "paid" ? `$${(c.budgetUsd || 0).toFixed(2)}` : "-").padEnd(12) + `$${sp.usd.toFixed(2)} ${sp.jobs} job`.padEnd(14) + n);
+        }
+        console.log("\nadd a key: maestro keys add <provider>   then: maestro keys enable <provider> [--budget <usd/day>]");
+        console.log("paid providers are used only with --paid (or batch \"paid\": true) and stop for the day at their budget.");
+        return 0;
+      }
+      if (sub === "add") {
+        const p = need();
+        console.log(`Get a key: ${p.keyUrl}\nopencode will ask for it and store it (Maestro never sees it).`);
+        const r = spawnSync(opencodeBin(), ["auth", "login", "-p", p.id], { stdio: "inherit" });
+        refreshModels();
+        if (r.status === 0) console.log(`\n${p.name} connected. Turn it on: maestro keys enable ${p.id}${p.billing === "paid" ? " --budget 2" : ""}`);
+        return r.status ?? 1;
+      }
+      if (sub === "remove" || sub === "logout") {
+        const p = need();
+        const r = spawnSync(opencodeBin(), ["auth", "logout", p.id], { stdio: "inherit" });
+        saveProviderSetting(p.id, { enabled: false });
+        refreshModels();
+        return r.status ?? 1;
+      }
+      if (sub === "enable" || sub === "disable") {
+        const p = need();
+        const patch = { enabled: sub === "enable" };
+        if (opt.budget !== undefined && opt.budget !== true) patch.budgetUsd = opt.budget;
+        const next = saveProviderSetting(p.id, patch);
+        console.log(`${p.name}: ${next.enabled ? "on" : "off"}${p.billing === "paid" ? `, budget $${(next.budgetUsd || 0).toFixed(2)}/day` : ""}`);
+        if (next.enabled && p.billing === "paid" && !next.budgetUsd) console.log(`set a daily budget first: maestro keys budget ${p.id} <usd>`);
+        return 0;
+      }
+      if (sub === "budget") {
+        const p = need();
+        const next = saveProviderSetting(p.id, { budgetUsd: value });
+        console.log(`${p.name}: budget $${next.budgetUsd.toFixed(2)}/day`);
+        return 0;
+      }
+      throw new OcError("usage: maestro keys [list] | add <provider> | remove <provider> | enable|disable <provider> [--budget usd] | budget <provider> <usd>", 2);
     }
     case "limits": {
       const L = machineLimits();

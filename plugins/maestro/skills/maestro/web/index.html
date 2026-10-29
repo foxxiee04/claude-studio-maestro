@@ -266,6 +266,20 @@
         <section class="card gantt-card">
           <header class="card-head">
             <div><h2 data-i18n="card.timeline">Dòng thời gian</h2></div>
+            <div class="tl-controls" id="tlControls">
+              <div class="seg tl-win-seg" id="tlWinSeg" role="group" aria-label="Khung thời gian">
+                <button type="button" data-hours="1">1h</button>
+                <button type="button" data-hours="3">3h</button>
+                <button type="button" data-hours="6">6h</button>
+                <button type="button" data-hours="12">12h</button>
+              </div>
+              <div class="tl-nav-group">
+                <button type="button" class="tl-btn" id="tlPrev" data-i18n-title="timeline.prevWindow" aria-label="‹">‹</button>
+                <span class="tl-label" id="tlLabel">—</span>
+                <button type="button" class="tl-btn" id="tlNext" data-i18n-title="timeline.nextWindow" aria-label="›">›</button>
+              </div>
+              <button type="button" class="tl-btn tl-latest-btn" id="tlLatest" data-i18n="timeline.latest">Mới nhất</button>
+            </div>
             <span class="legend" id="tlCount"></span>
           </header>
           <div class="gantt-wrap" id="ganttWrap"><div class="empty" data-i18n="timeline.loading">Đang tải dòng thời gian…</div></div>
@@ -446,6 +460,20 @@
                 <div class="setrow">
                   <div class="setinfo"><b data-i18n="settings.port">Cổng dashboard</b><span data-i18n="settings.portHint">Chỉ đọc</span></div>
                   <span class="mono" id="settingsPort">4790</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="card settings-card" id="cardProviders">
+              <header class="card-head">
+                <div><h2 data-i18n="providers.title">Nhà cung cấp</h2></div>
+              </header>
+              <div class="settings-list">
+                <div class="providers-intro-wrap">
+                  <p class="providers-intro" id="providersIntro"><span data-i18n="providers.introPre">Gắn key bằng lệnh</span> <code><span data-i18n="providers.introCmd">maestro keys add &lt;tên&gt;</span></code><span data-i18n="providers.introPost">; key do opencode cất giữ.</span></p>
+                </div>
+                <div class="providers-list" id="providersList">
+                  <div class="empty" data-i18n="common.loading">Đang tải…</div>
                 </div>
               </div>
             </section>

@@ -33,14 +33,20 @@ Give each job a `kind`; `oc` picks the best available free model for it and keep
 | `hard` | multi-file refactor, tricky bugs, integration jobs | code + fix + ui |
 
 - See the ranking before planning: `OC pick` (all kinds) or `OC pick ui`. Full table: `OC models`.
-- Score = bench quality (hidden checks) x reliability (share of jobs that did not die on the provider side),
-  updated by Claude's ratings (`OC rate`). A model whose endpoint failed in the last 30 minutes is skipped automatically.
+- Score = quality x reliability, updated by Claude's ratings (`OC rate`). Quality = public benchmark priors
+  (models.json `research`, or a family prior for models added with an API key) blended with the hidden-test bench.
+  Capability levels 1-5 gate kinds: hard >= 4, code/ui >= 3, quick >= 2. Failed endpoints are skipped for 30 min;
+  OpenCode's shared free quota running out skips every opencode model for 3 h.
 - Override when you have a reason: `--model provider/model` (fallbacks still apply unless `--fallbacks 0`), `--variant high|max`.
-- Re-bench after `opencode auth login` (paid providers), when `OC models` shows untested models, or monthly:
-  `OC bench` (all models; ~30 min; run it in a Terminal tab with run_in_terminal - Bash background commands get cut at 10 min)
-  or `OC bench <model> --tasks ui`.
-- Bench of 2026-10-22: 9 of 10 free models scored 93-100% (flint-40b-free: endpoint down). The tasks are small, so the
-  bench mostly separates working/broken and fast/slow; real differences show up in reliability and your ratings.
+- Do NOT spend model calls on re-benching (the user asked to save quota): rank with research priors; bench only a
+  single new model with `OC bench <model> --tasks fix` when the user asks.
+- Runners: opencode (free), `antigravity/gemini-*` (Antigravity CLI, free; edits only, no terminal commands, so
+  Claude runs the tests), ollama (local, weak), and opt-in (`--paid`): claude/*, codex/*, antigravity Claude/GPT,
+  and the user's own API keys.
+- API keys: `OC keys` lists providers (OpenAI, Anthropic, Google, OpenRouter, Groq, ...). Keys live in opencode's store
+  (`OC keys add <provider>` runs `opencode auth login`); Maestro keeps only on/off and a daily budget
+  (`OC keys enable <p> --budget 2`). Paid providers need `--paid` AND a budget, and stop for the day at the budget.
+  Never ask the user to paste a key into chat.
 
 ## 3. Write briefs
 

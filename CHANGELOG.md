@@ -5,6 +5,23 @@ All notable changes to the `claude-studio` plugins (`maestro` and `web-studio`) 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-10-29
+
+### Added
+- API-key providers: `maestro keys` (list / add / remove / enable / disable / budget) for OpenAI, Anthropic, Google AI
+  Studio, OpenRouter, Groq, Cerebras, DeepSeek, Mistral, xAI, Moonshot, Z.ai, Alibaba, Together and Fireworks. Keys stay
+  in opencode's store; Maestro keeps only on/off and a daily budget (`providers.json`) and spend per day (`spend.json`).
+- Paid providers are opt-in (`--paid`) and stop for the day at their budget; OpenRouter `:free` models are free.
+- Family-based quality priors from public benchmarks, so models added with a key are ranked from their first job.
+- Settings > Providers on the dashboard.
+- Dashboard preferences are saved server-side (`ui-prefs.json`) and restored on load.
+- Timeline: 1h/3h/6h/12h windows with navigation, at most 4 rows per project and 8 projects (expandable).
+
+### Changed
+- When OpenCode's free quota runs out and the fallback chain has only opencode models, the job is re-ranked onto
+  another runner instead of failing.
+- Overview "Running" card shows only the number of running jobs.
+
 ## [0.2.0] - 2026-10-29
 
 ### Added

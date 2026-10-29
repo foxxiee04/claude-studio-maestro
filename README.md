@@ -61,6 +61,7 @@ maestro rate <job> good|bad          # your verdict feeds the ranking
 | ollama | local models | free, one job at a time |
 | claude | Claude CLI (haiku, sonnet, opus) | opt-in (`--paid`), uses your plan |
 | codex | Codex CLI models | opt-in (`--paid`), quota-guarded |
+| your API keys | OpenAI, Anthropic, Google AI Studio, OpenRouter, Groq, Cerebras, DeepSeek, Mistral, xAI, Moonshot, Z.ai, Alibaba, Together, Fireworks | off until enabled; paid ones need `--paid` and a daily budget |
 
 ### How a model is chosen
 
@@ -71,6 +72,25 @@ maestro rate <job> good|bad          # your verdict feeds the ranking
 - **Your ratings**: `maestro rate` updates the estimate.
 - **Difficulty**: capability levels 1-5; `hard` jobs need level 4+, `code` and `ui` 3+, `quick` 2+.
 - **Machine**: concurrency follows CPU cores, free RAM and CPU load, with per-model and local-model caps.
+
+### Your own API keys
+
+Keys stay in opencode's credential store; Maestro never reads or saves a key, it only knows which providers have one.
+
+```bash
+maestro keys                              # providers: key connected?, on/off, billing, budget, spent today
+maestro keys add openrouter               # runs `opencode auth login` for that provider
+maestro keys enable openrouter --budget 2 # turn it on with a 2 USD/day budget
+maestro keys budget openai 5              # change the daily budget
+maestro keys disable groq                 # or: maestro keys remove groq
+```
+
+- A newly connected provider is **off** until you enable it (here or in Settings > Providers on the dashboard).
+- **Paid** providers are used only by jobs run with `--paid` (batch `"paid": true`) **and** with a budget set; once
+  today's spend reaches the budget the provider is skipped until tomorrow. OpenRouter `:free` models cost nothing.
+- **Free-tier** providers (Google AI Studio, Groq, Cerebras) join automatic picks once enabled.
+- New models are ranked from their first job using public benchmark priors for their family (GPT, Claude, Gemini,
+  DeepSeek, Qwen, Kimi, GLM, Grok, Mistral/Devstral, Llama...).
 
 ### Dashboard
 
@@ -131,6 +151,7 @@ Sau đó nhờ Claude "cài đặt maestro và web-studio" (hoặc chạy `scrip
 - `maestro`: mở app dashboard (server chạy ngầm, không có cửa sổ terminal); `maestro close` để tắt
 - `maestro pick --kind hard`: xem model nào sẽ nhận việc khó và vì sao
 - `maestro limits`, `maestro doctor`: giới hạn theo máy, kiểm tra agent
+- `maestro keys`: gắn API key (OpenAI, OpenRouter, Groq...), bật/tắt, ngân sách theo ngày; key do opencode cất giữ
 - `/web-studio:design-web làm landing page cho ...`: làm web từ chọn mẫu đến chạy được
 
 Dữ liệu (log job, đánh giá, catalog template) nằm trên máy bạn, không gửi đi đâu.

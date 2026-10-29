@@ -10,3 +10,6 @@ plugins/web-studio/skills/ui-template-picker/scout/catalog.json
 plugins/web-studio/skills/ui-template-picker/scout/thumbs/
 .claude-studio/
 design/
+**/providers.json
+**/spend.json
+**/ui-prefs.json
