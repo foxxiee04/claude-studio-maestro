@@ -1,0 +1,26 @@
+{
+  "dir": "C:/path/to/your-project",
+  "defaults": { "timeout": 2100, "stall": 420 },
+  "jobs": [
+    { "name": "w2-admin-shell", "brief": "b2-admin-shell.md", "kind": "ui", "scope": "src/app/admin/layout.tsx,src/components/admin" },
+    { "name": "w2-landing-top", "brief": "b2-landing-top.md", "kind": "ui",
+      "scope": "src/components/landing/site-header.tsx,src/components/landing/hero.tsx,src/components/landing/cursor-trail.tsx,src/components/landing/marquee-strip.tsx,src/components/landing/story.tsx,src/components/landing/menu-section.tsx,src/app/page.tsx" },
+    { "name": "w2-landing-bottom", "brief": "b2-landing-bottom.md", "kind": "ui",
+      "scope": "src/components/landing/space-gallery.tsx,src/components/landing/reviews.tsx,src/components/landing/booking.tsx,src/components/landing/site-footer.tsx" },
+    { "name": "w2-login", "brief": "b2-login.md", "kind": "quick", "scope": "src/app/login" },
+    { "name": "w3-dashboard", "brief": "b3-p-dashboard.md", "kind": "ui", "after": ["w2-admin-shell"],
+      "scope": "src/app/admin/page.tsx,src/app/admin/_components,src/app/admin/reports" },
+    { "name": "w3-pos", "brief": "b3-p-pos.md", "kind": "hard", "after": ["w2-admin-shell"], "scope": "src/app/admin/pos" },
+    { "name": "w3-orders-tables", "brief": "b3-p-orders-tables.md", "kind": "ui", "after": ["w2-admin-shell"],
+      "scope": "src/app/admin/orders,src/app/admin/tables" },
+    { "name": "w3-menu-inventory", "brief": "b3-p-menu.md", "kind": "ui", "after": ["w2-admin-shell"],
+      "scope": "src/app/admin/menu,src/app/admin/inventory" },
+    { "name": "w3-staff-shifts", "brief": "b3-p-staff.md", "kind": "ui", "after": ["w2-admin-shell"],
+      "scope": "src/app/admin/staff,src/app/admin/shifts" },
+    { "name": "w3-crm-settings", "brief": "b3-p-crm.md", "kind": "ui", "after": ["w2-admin-shell"],
+      "scope": "src/app/admin/customers,src/app/admin/promotions,src/app/admin/settings" },
+    { "name": "w4-integrate", "brief": "b4-integrate.md", "kind": "hard",
+      "after": ["w2-landing-top", "w2-landing-bottom", "w2-login", "w3-dashboard", "w3-pos", "w3-orders-tables", "w3-menu-inventory", "w3-staff-shifts", "w3-crm-settings"],
+      "scope": "src/app,src/components/landing,src/components/admin" }
+  ]
+}

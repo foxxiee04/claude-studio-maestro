@@ -1,0 +1,12 @@
+node_modules/
+**/stats.json
+**/.oc-tmp/
+**/.batches/
+*.bak*
+*.log
+.DS_Store
+Thumbs.db
+plugins/web-studio/skills/ui-template-picker/scout/catalog.json
+plugins/web-studio/skills/ui-template-picker/scout/thumbs/
+.claude-studio/
+design/

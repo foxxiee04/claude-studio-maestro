@@ -1,0 +1,36 @@
+{
+  "name": "claude-studio",
+  "description": "Maestro (multi-agent AI orchestra: routing, parallel jobs, live dashboard) and Web Studio (pick real templates, design, build beautiful web UIs with motion) for Claude Code.",
+  "owner": {
+    "name": "foxxiee",
+    "url": "https://github.com/foxxiee04"
+  },
+  "plugins": [
+    {
+      "name": "maestro",
+      "source": "./plugins/maestro",
+      "description": "Claude plans and verifies; coding agents (opencode free models, Antigravity CLI with Gemini, local Ollama, Claude CLI, Codex) do the work. Routes each job to the right model by difficulty, runs jobs in parallel with fallbacks, ranks models from public benchmarks plus hidden tests, and shows everything in a desktop-style dashboard.",
+      "version": "0.2.0",
+      "author": {
+        "name": "foxxiee"
+      },
+      "homepage": "https://github.com/foxxiee04/claude-studio-maestro",
+      "license": "MIT"
+    },
+    {
+      "name": "web-studio",
+      "source": "./plugins/web-studio",
+      "description": "/web-studio:design-web - crawls real templates from curated sites into a gallery you pick from, turns picks into 3 design directions with live motion, then builds the site (Next.js + shadcn + motion) through Maestro.",
+      "version": "0.2.0",
+      "author": {
+        "name": "foxxiee"
+      },
+      "homepage": "https://github.com/foxxiee04/claude-studio-maestro",
+      "license": "MIT"
+    }
+  ],
+  "metadata": {
+    "description": "Maestro (multi-agent AI orchestra: routing, parallel jobs, live dashboard) and Web Studio (pick real templates, design, build beautiful web UIs with motion) for Claude Code.",
+    "version": "0.2.0"
+  }
+}

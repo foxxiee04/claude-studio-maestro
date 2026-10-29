@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Template Options</title>
+<style>
+  :root {
+    --page: #f6f4f0; --ink: #1b1916; --muted: #6f6a63; --line: rgb(27 25 22 / 0.1); --card: #fffdf9;
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  header.top { max-width: 1440px; margin: 0 auto; padding: 40px 24px 8px; }
+  header.top h1 { font-size: 28px; letter-spacing: -0.02em; margin: 0 0 6px; }
+  header.top p { margin: 0; color: var(--muted); max-width: 70ch; }
+  .grid { max-width: 1440px; margin: 0 auto; padding: 24px; display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 400px), 1fr)); }
+  .opt { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column;
+         box-shadow: 0 30px 60px -40px rgb(27 25 22 / 0.35); }
+  .opt-head { padding: 18px 20px 14px; display: flex; gap: 14px; align-items: baseline; }
+  .badge { font-weight: 700; font-size: 13px; width: 28px; height: 28px; border-radius: 99px; display: grid; place-items: center; background: var(--ink); color: #fff; flex: none; }
+  .opt-head h2 { margin: 0; font-size: 19px; letter-spacing: -0.01em; }
+  .opt-head p { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+
+  /* ----- mock site, styled by per-option CSS variables ----- */
+  .mock { --bg: #fff; --surface: #fff; --text: #111; --muted2: #666; --accent: #333; --radius: 14px;
+          position: relative; margin: 0 14px; border-radius: 14px; overflow: hidden; background: var(--bg); color: var(--text);
+          border: 1px solid var(--line); min-height: clamp(340px, 30vw, 440px); display: flex; flex-direction: column; isolation: isolate; }
+  .mock .blob { position: absolute; z-index: -1; width: 60%; aspect-ratio: 1; border-radius: 50%; filter: blur(50px); opacity: .45;
+                background: var(--accent); top: -20%; right: -15%; }
+  .mock nav { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; font: 500 11px var(--body); }
+  .mock nav .logo { font: 600 14px var(--display); letter-spacing: -0.01em; }
+  .mock nav .links { display: flex; gap: 12px; color: var(--muted2); }
+  .mock .hero { padding: 6% 16px 0; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .mock .eyebrow { font: 500 10px var(--body); letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .mock h3 { margin: 0; font: 400 clamp(26px, 3.1vw, 40px)/1.02 var(--display); letter-spacing: -0.025em; }
+  .mock h3 .line { display: block; overflow: hidden; padding-bottom: .06em; }
+  .mock h3 .line > span { display: inline-block; }
+  .mock .sub { margin: 0; font: 400 12px/1.5 var(--body); color: var(--muted2); max-width: 34ch; }
+  .mock .ctas { display: flex; gap: 8px; margin-top: 4px; }
+  .mock .btn { font: 500 11px var(--body); padding: 8px 14px; border-radius: 99px; background: var(--text); color: var(--bg); border: 0; display: inline-block; }
+  .mock .btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 18%, transparent); }
+  .mock .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px 12px; }
+  .mock .c { background: var(--surface); border-radius: calc(var(--radius) * .7); padding: 10px; min-height: 58px;
+             box-shadow: 0 10px 24px -16px rgb(0 0 0 / .35); border: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
+             font: 500 10px var(--body); transition: transform .35s var(--ease), box-shadow .35s var(--ease); }
+  .mock .c i { display: block; width: 16px; height: 16px; border-radius: 6px; background: var(--accent); opacity: .85; margin-bottom: 8px; }
+  .mock .strip { overflow: hidden; border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); padding: 8px 0; white-space: nowrap;
+                 font: 600 10px var(--display); color: var(--muted2); letter-spacing: .08em; text-transform: uppercase; }
+  .mock .strip .track { display: inline-flex; gap: 28px; padding-left: 16px; }
+
+  /* ----- motion demos (toggled by data-motion on .mock, replayed by .play) ----- */
+  .play.m-mask-reveal h3 .line > span { animation: maskUp .9s var(--ease) both; }
+  .play.m-mask-reveal h3 .line:nth-child(2) > span { animation-delay: .1s; }
+  @keyframes maskUp { from { transform: translateY(105%); } to { transform: none; } }
+  .play.m-stagger-up .c, .play.m-stagger-up .sub, .play.m-stagger-up .ctas { animation: fadeUp .8s var(--ease) both; }
+  .play.m-stagger-up .sub { animation-delay: .15s; } .play.m-stagger-up .ctas { animation-delay: .25s; }
+  .play.m-stagger-up .c:nth-child(1) { animation-delay: .35s; } .play.m-stagger-up .c:nth-child(2) { animation-delay: .45s; } .play.m-stagger-up .c:nth-child(3) { animation-delay: .55s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+  .play.m-blur-in .hero { animation: blurIn 1.1s var(--ease) both; }
+  @keyframes blurIn { from { opacity: 0; filter: blur(12px); transform: scale(1.02); } to { opacity: 1; filter: none; transform: none; } }
+  .play.m-scale-in .cards { animation: scaleIn 1s var(--ease) both .2s; }
+  @keyframes scaleIn { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: none; } }
+  .m-float .blob { animation: floaty 7s ease-in-out infinite alternate; }
+  @keyframes floaty { from { transform: translate(0, 0) scale(1); } to { transform: translate(-30%, 25%) scale(1.15); } }
+  .m-gradient-drift { background: linear-gradient(120deg, var(--bg), color-mix(in srgb, var(--accent) 14%, var(--bg)), var(--bg)); background-size: 300% 300%; animation: drift 9s ease-in-out infinite alternate; }
+  @keyframes drift { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
+  .m-marquee .strip .track { animation: marquee 14s linear infinite; }
+  @keyframes marquee { to { transform: translateX(-50%); } }
+  .m-hover-lift .c:hover { transform: translateY(-6px); box-shadow: 0 22px 34px -18px rgb(0 0 0 / .45); }
+  @media (prefers-reduced-motion: reduce) { .mock *, .mock { animation: none !important; transition: none !important; } }
+
+  .opt-body { padding: 16px 20px 20px; display: grid; gap: 14px; }
+  .row-label { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+  .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+  .sw { display: flex; align-items: center; gap: 6px; font: 12px ui-monospace, Consolas, monospace; color: var(--muted);
+        border: 1px solid var(--line); border-radius: 99px; padding: 3px 9px 3px 3px; }
+  .sw b { width: 18px; height: 18px; border-radius: 99px; border: 1px solid rgb(0 0 0 / .1); }
+  .fonts { font-size: 14px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-size: 12.5px; border: 1px solid var(--line); background: #fff; border-radius: 99px; padding: 4px 11px; cursor: pointer; color: var(--ink); }
+  .chip:hover { border-color: var(--ink); }
+  ul.sections { margin: 0; padding-left: 18px; color: var(--ink); font-size: 13.5px; }
+  .refs a { color: var(--ink); font-size: 13.5px; text-underline-offset: 3px; display: block; overflow-wrap: anywhere; }
+  .meta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .tag { font-size: 12px; background: #f1ede6; border-radius: 6px; padding: 3px 8px; color: var(--muted); }
+  .tag strong { color: var(--ink); font-weight: 600; }
+  .replay { justify-self: start; font: 500 13px system-ui; border: 0; background: var(--ink); color: #fff; padding: 8px 14px; border-radius: 99px; cursor: pointer; }
+  footer { max-width: 1440px; margin: 0 auto; padding: 8px 24px 48px; color: var(--muted); }
+  @media (max-width: 480px) { .grid { padding: 16px; } header.top { padding: 28px 16px 0; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="title">Template options</h1>
+  <p id="intro">So sánh các hướng giao diện. Bấm vào chip motion để xem lại hiệu ứng. Sau đó trả lời trong chat: chọn A, B, C hoặc kết hợp, ví dụ "A + motion của C".</p>
+</header>
+<main class="grid" id="grid"></main>
+<footer>Mock chỉ minh hoạ màu, chữ và motion. Bố cục thật lấy theo template tham chiếu.</footer>
+
+<script>
+/* ===== DATA - Claude replaces only this block ===== */
+const PROJECT = { name: "Mộc Café", tagline: "Rang mộc, pha chậm, ngồi thật lâu", eyebrow: "Specialty coffee · Sài Gòn" };
+const OPTIONS = [
+  {
+    id: "A", name: "Kem Espresso", mood: "Theo Coffee Shop: nền kem ấm, nút pill nâu espresso, chữ viết tay cho logo, thẻ món nổi lơ lửng. Gần gũi, ấm.",
+    palette: { bg: "#F3EEE6", surface: "#FFFCF7", text: "#2A1A13", muted: "#7B6A5E", accent: "#3B2016" },
+    fonts: { display: "Patrick Hand", body: "Be Vietnam Pro" }, radius: "22px",
+    motion: ["stagger-up", "float", "hover-lift", "marquee"],
+    sections: ["Hero: wordmark viết tay + ảnh mặt tiền quán, thẻ đồ uống nổi lơ lửng", "Câu chuyện quán (2 cột)", "Thực đơn có lọc theo loại (cà phê, trà, bánh)", "Không gian - gallery ảnh", "Đánh giá khách + đặt bàn", "Admin: sidebar kem, trạng thái active nâu espresso, thẻ bo tròn mềm"],
+    refs: [{ label: "Webild - Coffee Shop", url: "https://www.webild.io/templates" }],
+    icons: "itshover (ly cà phê, giỏ hàng, lịch…) - chạy khi hover nút", effort: "M", cost: "Miễn phí - tự dựng lại"
+  },
+  {
+    id: "B", name: "Sân Vườn", mood: "Theo Product Showcase: ảnh quán sân vườn tràn màn hình, tiêu đề sans pha một chữ serif nghiêng, accent xanh ô-liu. Thoáng, hiện đại.",
+    palette: { bg: "#F4F3EC", surface: "#FFFFFF", text: "#1C1F17", muted: "#6B7062", accent: "#4E5D2C" },
+    fonts: { display: "Playfair Display", body: "Plus Jakarta Sans" }, radius: "18px",
+    motion: ["scale-in", "blur-in", "hover-lift", "marquee"],
+    sections: ["Hero ảnh toàn màn hình + pill avatar '4.9★ từ 2.000 khách'", "3 điểm nổi bật (hạt, rang, không gian)", "Món nổi bật: thẻ có chọn size/đá", "Không gian với parallax", "Đánh giá + FAQ + CTA đặt bàn", "Admin: nền trắng sạch, accent ô-liu, biểu đồ xanh"],
+    refs: [{ label: "Webild - Product Showcase", url: "https://www.webild.io/templates" }],
+    icons: "itshover", effort: "M", cost: "Miễn phí - tự dựng lại"
+  },
+  {
+    id: "C", name: "Tạp Chí Rang Xay", mood: "Theo ELLISON: khung ngà nổi trên ảnh vườn cà phê, serif lớn tách đôi quanh ảnh đen trắng, menu chữ in hoa nhỏ. Sang, nghệ thuật.",
+    palette: { bg: "#F6F4EF", surface: "#FCFBF8", text: "#151412", muted: "#77736C", accent: "#8A5A3B" },
+    fonts: { display: "Cormorant Garamond", body: "Inter" }, radius: "24px",
+    motion: ["mask-reveal", "stagger-up", "hover-lift", "float"],
+    sections: ["Hero: 'Mộc ▢ Café' tách đôi quanh ảnh, ảnh tự chuyển", "Hành trình hạt cà phê - cuộn có hướng", "Thực đơn dạng danh sách tạp chí", "Journal / câu chuyện", "Đặt bàn + footer tối giản", "Admin: chữ serif cho tiêu đề, bảng mảnh, accent nâu đồng"],
+    refs: [{ label: "HorizonX - ELLISON", url: "https://horizonx.so/explore/ellison" }],
+    icons: "itshover", effort: "L", cost: "Ref trả phí - tự dựng lại"
+  }
+];
+/* ===== END DATA ===== */
+
+const MOTION_LABEL = {
+  "mask-reveal": "Mask reveal tiêu đề", "stagger-up": "Stagger fade-up", "blur-in": "Blur-in", "scale-in": "Scale-in",
+  "float": "Blob trôi nhẹ", "gradient-drift": "Gradient trôi", "marquee": "Marquee logo", "hover-lift": "Hover nâng thẻ (rê chuột)",
+};
+const ONE_SHOT = ["mask-reveal", "stagger-up", "blur-in", "scale-in"];
+
+const loaded = new Set();
+function loadFont(name) {
+  if (!name || loaded.has(name)) return;
+  loaded.add(name);
+  const fam = name.trim().replace(/ /g, "+");
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${fam}:wght@400;500;600&display=swap`;
+  link.onerror = () => { link.href = `https://fonts.googleapis.com/css2?family=${fam}&display=swap`; link.onerror = null; };
+  document.head.appendChild(link);
+}
+
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+function replay(mock, only) {
+  const ids = only ? [only] : ONE_SHOT.filter((m) => mock.dataset.motion.split(" ").includes(m));
+  mock.classList.remove("play", ...ONE_SHOT.map((m) => "m-" + m));
+  void mock.offsetWidth; // restart CSS animations
+  mock.classList.add("play", ...ids.map((m) => "m-" + m));
+}
+
+document.getElementById("title").textContent = `${PROJECT.name} - chọn hướng giao diện`;
+document.title = `${PROJECT.name} options`;
+const grid = document.getElementById("grid");
+
+for (const o of OPTIONS) {
+  loadFont(o.fonts.display); loadFont(o.fonts.body);
+  const p = o.palette;
+  const words = PROJECT.tagline.split(" ");
+  const half = Math.ceil(words.length / 2);
+  const persistent = o.motion.filter((m) => !ONE_SHOT.includes(m)).map((m) => "m-" + m).join(" ");
+  const el = document.createElement("article");
+  el.className = "opt";
+  el.innerHTML = `
+    <div class="opt-head"><span class="badge">${esc(o.id)}</span><div><h2>${esc(o.name)}</h2><p>${esc(o.mood)}</p></div></div>
+    <div class="mock ${persistent}" data-motion="${esc(o.motion.join(" "))}"
+         style="--bg:${p.bg};--surface:${p.surface};--text:${p.text};--muted2:${p.muted};--accent:${p.accent};--radius:${o.radius || "14px"};
+                --display:'${esc(o.fonts.display)}', Georgia, serif;--body:'${esc(o.fonts.body)}', system-ui, sans-serif;">
+      <div class="blob"></div>
+      <nav><span class="logo">${esc(PROJECT.name)}</span><span class="links"><span>Shop</span><span>Story</span><span>Journal</span></span></nav>
+      <div class="hero">
+        <span class="eyebrow">${esc(PROJECT.eyebrow || "")}</span>
+        <h3><span class="line"><span>${esc(words.slice(0, half).join(" "))}</span></span><span class="line"><span>${esc(words.slice(half).join(" "))}</span></span></h3>
+        <p class="sub">Một bản mock nhỏ để cảm nhận màu, chữ và nhịp chuyển động của hướng này.</p>
+        <div class="ctas"><span class="btn">Khám phá</span><span class="btn ghost">Tìm hiểu</span></div>
+      </div>
+      <div class="cards"><div class="c"><i></i>Tinh tế</div><div class="c"><i></i>Bền vững</div><div class="c"><i></i>Thủ công</div></div>
+      <div class="strip"><div class="track">${Array(2).fill("<span>Vogue</span><span>Kinfolk</span><span>Monocle</span><span>Wallpaper</span><span>Cereal</span>").join("")}</div></div>
+    </div>
+    <div class="opt-body">
+      <button class="replay" type="button">↻ Xem lại motion</button>
+      <div><div class="row-label">Màu</div><div class="swatches">${Object.entries(p).map(([k, v]) => `<span class="sw"><b style="background:${esc(v)}"></b>${esc(k)} ${esc(v)}</span>`).join("")}</div></div>
+      <div><div class="row-label">Font</div><div class="fonts"><span style="font-family:'${esc(o.fonts.display)}',serif;font-size:20px">${esc(o.fonts.display)}</span> + <span style="font-family:'${esc(o.fonts.body)}',sans-serif">${esc(o.fonts.body)}</span></div></div>
+      <div><div class="row-label">Motion đặc trưng</div><div class="chips">${o.motion.map((m) => `<button type="button" class="chip" data-m="${esc(m)}">${esc(MOTION_LABEL[m] || m)}</button>`).join("")}</div></div>
+      <div><div class="row-label">Các section</div><ul class="sections">${o.sections.map((s) => `<li>${esc(s)}</li>`).join("")}</ul></div>
+      <div class="refs"><div class="row-label">Tham chiếu</div>${o.refs.map((r) => `<a href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.label)} ↗</a>`).join("")}</div>
+      <div class="meta"><span class="tag">Icon: <strong>${esc(o.icons)}</strong></span><span class="tag">Công sức: <strong>${esc(o.effort)}</strong></span><span class="tag">Chi phí: <strong>${esc(o.cost)}</strong></span></div>
+    </div>`;
+  grid.appendChild(el);
+  const mock = el.querySelector(".mock");
+  el.querySelector(".replay").addEventListener("click", () => replay(mock));
+  el.querySelectorAll(".chip").forEach((b) => b.addEventListener("click", () => ONE_SHOT.includes(b.dataset.m) ? replay(mock, b.dataset.m) : replay(mock)));
+  requestAnimationFrame(() => replay(mock));
+}
+</script>
+</body>
+</html>

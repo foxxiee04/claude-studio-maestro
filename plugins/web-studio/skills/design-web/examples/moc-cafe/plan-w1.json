@@ -1,0 +1,10 @@
+{
+  "dir": "C:/path/to/your-project",
+  "defaults": { "timeout": 1800, "stall": 420 },
+  "jobs": [
+    { "name": "w1-foundation", "brief": "b1-foundation.md", "kind": "code",
+      "scope": "src/app/globals.css,src/app/layout.tsx,src/components/providers.tsx,src/components/motion,src/lib/format.ts" },
+    { "name": "w1-mock-data", "brief": "b1-mock-data.md", "kind": "code",
+      "scope": "src/lib/types.ts,src/lib/mock" }
+  ]
+}

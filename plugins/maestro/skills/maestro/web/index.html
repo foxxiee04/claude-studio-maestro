@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maestro</title>
+<link rel="icon" type="image/png" href="/fox.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<header class="titlebar" id="titlebar">
+  <div class="traffic" id="traffic" role="group" aria-label="Điều khiển cửa sổ" data-i18n-aria="window.controls">
+    <button class="tl tl-close" id="tlClose" type="button" aria-label="Đóng" title="Đóng" data-i18n-aria="window.close" data-i18n-title="window.close"><span class="tl-glyph" aria-hidden="true">×</span></button>
+    <button class="tl tl-min" id="tlMin" type="button" aria-label="Thu gọn" title="Thu gọn" data-i18n-aria="window.min" data-i18n-title="window.min"><span class="tl-glyph" aria-hidden="true">–</span></button>
+    <button class="tl tl-max" id="tlMax" type="button" aria-label="Toàn màn hình" title="Toàn màn hình" data-i18n-aria="window.max" data-i18n-title="window.max"><span class="tl-glyph" aria-hidden="true">+</span></button>
+  </div>
+  <div class="tb-center">
+    <img class="tb-mark" src="/fox.png" alt="" aria-hidden="true">
+    <span id="titlebarTitle">Maestro — Tổng quan</span>
+  </div>
+  <div class="tb-right">
+    <span class="tb-conn" id="tbConn"><i class="conn-dot" id="connDotTop"></i><span id="tbConnText" data-i18n="conn.updating">Đang cập nhật</span></span>
+    <span class="slot-chip" id="slotsTop" title="Job đang chạy / song song tối đa" data-i18n-title="titlebar.slotsTitle">0/3</span>
+    <span class="tb-clock" id="clock" title="Giờ hiện tại" data-i18n-title="titlebar.clockTitle">--:--:--</span>
+    <button class="bellbtn" id="bellBtn" type="button" aria-label="Thông báo" data-i18n-aria="notif.bell" aria-expanded="false" aria-controls="notifPanel">
+      <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 6-2.5 7-2.5 7h17S18 14 18 8"/><path d="M10.3 19a2 2 0 0 0 3.4 0"/></svg>
+      <span class="bell-badge" id="bellBadge" hidden>0</span>
+    </button>
+  </div>
+</header>
+
+<div class="app" id="app">
+  <aside class="sidebar" id="sidebar" aria-label="Điều hướng bảng điều khiển" data-i18n-aria="nav.aria">
+    <div class="side-top">
+      <a class="brand" href="#/tong-quan" title="Maestro">
+        <span class="logo"><img src="/fox-avatar.png" alt="" width="38" height="38"></span>
+        <span class="brand-text"><b>Maestro</b><span>by foxxiee</span></span>
+      </a>
+      <button class="side-collapse" id="collapseBtn" type="button" aria-label="Thu gọn thanh bên" data-i18n-aria="sidebar.collapse" title="Thu gọn thanh bên" data-i18n-title="sidebar.collapse" aria-expanded="true" aria-controls="sidebar">
+        <svg class="ic-left" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 6l-6 6 6 6"/></svg>
+        <svg class="ic-right" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+
+    <nav class="side-nav" id="sideNav">
+      <a class="navitem" href="#/tong-quan" data-view="overview" data-i18n-title="nav.overview" data-i18n-label="nav.overview" data-label="Tổng quan">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></span>
+        <span class="ni-label" data-i18n="nav.overview">Tổng quan</span>
+      </a>
+      <a class="navitem" href="#/cong-viec" data-view="jobs" data-i18n-title="nav.jobs" data-i18n-label="nav.jobs" data-label="Công việc">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1.2"/><circle cx="3.5" cy="12" r="1.2"/><circle cx="3.5" cy="18" r="1.2"/></svg></span>
+        <span class="ni-label" data-i18n="nav.jobs">Công việc</span>
+        <span class="ni-badge" id="badgeJobs" hidden></span>
+      </a>
+      <a class="navitem" href="#/dong-thoi-gian" data-view="timeline" data-i18n-title="nav.timeline" data-i18n-label="nav.timeline" data-label="Dòng thời gian">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></svg></span>
+        <span class="ni-label" data-i18n="nav.timeline">Dòng thời gian</span>
+      </a>
+      <a class="navitem" href="#/ke-hoach" data-view="plans" data-i18n-title="nav.plans" data-i18n-label="nav.plans" data-label="Kế hoạch">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 17l9 5 9-5"/></svg></span>
+        <span class="ni-label" data-i18n="nav.plans">Kế hoạch</span>
+        <span class="ni-badge" id="badgePlans" hidden></span>
+      </a>
+      <a class="navitem" href="#/model" data-view="models" data-i18n-title="nav.models" data-i18n-label="nav.models" data-label="Model">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2.5"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg></span>
+        <span class="ni-label" data-i18n="nav.models">Model</span>
+      </a>
+      <a class="navitem" href="#/tien-trinh" data-view="processes" data-i18n-title="nav.processes" data-i18n-label="nav.processes" data-label="Tiến trình">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></span>
+        <span class="ni-label" data-i18n="nav.processes">Tiến trình</span>
+        <span class="ni-badge" id="badgeProcs" hidden></span>
+      </a>
+      <a class="navitem" href="#/cai-dat" data-view="settings" data-i18n-title="nav.settings" data-i18n-label="nav.settings" data-label="Cài đặt">
+        <span class="ni-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg></span>
+        <span class="ni-label" data-i18n="nav.settings">Cài đặt</span>
+      </a>
+    </nav>
+
+    <div class="side-foot">
+      <div class="user-card" id="userCard" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" title="foxxiee">
+        <div class="uc-avatar-wrap">
+          <img class="uc-avatar" src="/fox-avatar.png" alt="" width="32" height="32">
+        </div>
+        <div class="uc-info">
+          <div class="uc-name">foxxiee</div>
+        </div>
+      </div>
+      <div class="user-popover" id="userPopover" hidden>
+        <button type="button" class="upop-item" id="upopSettings">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="nav.settings">Cài đặt</span>
+        </button>
+        <div class="upop-row">
+          <span data-i18n="user.darkMode">Giao diện tối</span>
+          <button class="theme-switch" id="popTheme" type="button" role="switch" aria-checked="false" aria-label="Giao diện tối" data-i18n-aria="user.darkMode">
+            <span class="ts-track"><span class="ts-knob">
+              <svg class="icon-sun" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+              <svg class="icon-moon" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+            </span></span>
+          </button>
+        </div>
+        <div class="upop-version" id="upopVersion">opencode —</div>
+        <button type="button" class="upop-item" id="upopAbout">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg>
+          <span data-i18n="user.about">Giới thiệu Maestro</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-scrim" id="sidebarScrim" hidden></div>
+
+  <div class="app-main">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <button class="hamburger" id="menuBtn" type="button" aria-label="Thu gọn thanh bên" data-i18n-aria="sidebar.collapse" aria-expanded="true" aria-controls="sidebar">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <div class="page-head">
+          <h1 id="pageTitle" data-i18n="nav.overview">Tổng quan</h1>
+        </div>
+        <div class="top-tools">
+          <div class="searchbox" id="searchBox">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <input id="globalSearch" type="search" placeholder="Tìm job, mã job…  ( / )" data-i18n-placeholder="search.placeholder" autocomplete="off" spellcheck="false" aria-label="Tìm công việc" data-i18n-aria="search.aria">
+            <kbd>/</kbd>
+            <div class="search-results" id="searchResults" hidden></div>
+          </div>
+          <div class="seg range-seg" id="rangeSeg" role="group" aria-label="Khoảng thời gian" data-i18n-aria="range.aria">
+            <button type="button" data-range="today" data-i18n="range.today">Hôm nay</button>
+            <button type="button" data-range="24h" data-i18n="range.24h">24 giờ</button>
+            <button type="button" data-range="7d" data-i18n="range.7d">7 ngày</button>
+          </div>
+          <div class="refresh-meta">
+            <span><span data-i18n="refresh.label">cập nhật</span> <b id="refreshTime">--:--:--</b></span>
+            <span class="refresh-iv" id="refreshIv">mỗi 2 giây</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- Tổng quan -->
+      <section class="view" id="view-overview" data-view="overview">
+        <div class="kpi-grid" id="kpis"></div>
+        <div class="grid">
+          <section class="card col-8">
+            <header class="card-head">
+              <div><h2 data-i18n="card.jobsByHour">Job theo giờ</h2></div>
+              <span class="legend" id="hourLegend"></span>
+            </header>
+            <div class="chart" id="chartHourly"></div>
+          </section>
+          <section class="card col-4">
+            <header class="card-head">
+              <div><h2 data-i18n="card.status">Trạng thái</h2></div>
+            </header>
+            <div class="chart" id="chartStatus"></div>
+          </section>
+          <section class="card col-6">
+            <header class="card-head">
+              <div><h2 data-i18n="card.tokensByModel">Token theo model</h2></div>
+            </header>
+            <div class="chart" id="chartTokens"></div>
+          </section>
+          <section class="card col-6">
+            <header class="card-head">
+              <div><h2 data-i18n="card.concurrency">Số job chạy song song</h2></div>
+            </header>
+            <div class="chart" id="chartConcurrency"></div>
+          </section>
+          <section class="card col-7 live-card-card">
+            <header class="card-head">
+              <div><h2 data-i18n="card.running">Đang chạy</h2></div>
+              <span class="legend" id="liveCount"></span>
+            </header>
+            <div class="live-grid" id="liveBody"><div class="empty" data-i18n="common.loading">Đang tải…</div></div>
+          </section>
+          <section class="card col-5">
+            <header class="card-head">
+              <div><h2 data-i18n="card.recent">Hoạt động gần đây</h2></div>
+            </header>
+            <div class="feed" id="recentFeed"><div class="empty" data-i18n="common.loading">Đang tải…</div></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Công việc -->
+      <section class="view" id="view-jobs" data-view="jobs" hidden>
+        <section class="card jobs-card">
+          <header class="card-head">
+            <div><h2 data-i18n="nav.jobs">Công việc</h2></div>
+            <span class="legend" id="jobsCount"></span>
+          </header>
+          <div class="status-chips" id="jobChips"></div>
+          <div class="filters">
+            <div class="fgroup">
+              <label for="fProject" data-i18n="filter.project">Dự án</label>
+              <select class="select" id="fProject"><option value="" data-i18n="filter.allProjects">Mọi dự án</option></select>
+            </div>
+            <div class="fgroup">
+              <label data-i18n="filter.status">Trạng thái</label>
+              <div class="chipset" id="fStatus">
+                <button class="chipbtn active" type="button" data-value="" data-i18n="filter.all">Tất cả</button>
+                <button class="chipbtn" type="button" data-value="running" data-i18n="status.running">Đang chạy</button>
+                <button class="chipbtn" type="button" data-value="done" data-i18n="status.done">Hoàn tất</button>
+                <button class="chipbtn" type="button" data-value="failed" data-i18n="status.failed">Lỗi</button>
+                <button class="chipbtn" type="button" data-value="stopped" data-i18n="status.stopped">Đã dừng</button>
+              </div>
+            </div>
+            <div class="fgroup">
+              <label for="fModel" data-i18n="filter.model">Model</label>
+              <select class="select" id="fModel"><option value="" data-i18n="filter.allModels">Mọi model</option></select>
+            </div>
+            <div class="fgroup">
+              <label data-i18n="filter.kind">Loại</label>
+              <div class="chipset" id="fKind">
+                <button class="chipbtn active" type="button" data-value="" data-i18n="filter.all">Tất cả</button>
+                <button class="chipbtn" type="button" data-value="quick" data-i18n="kind.quick">quick</button>
+                <button class="chipbtn" type="button" data-value="code" data-i18n="kind.code">code</button>
+                <button class="chipbtn" type="button" data-value="ui" data-i18n="kind.ui">ui</button>
+                <button class="chipbtn" type="button" data-value="hard" data-i18n="kind.hard">hard</button>
+              </div>
+            </div>
+            <div class="fgroup wide">
+              <label for="fSearch" data-i18n="filter.search">Tìm trong bảng</label>
+              <input class="input" id="fSearch" type="search" placeholder="Tên job, model, hoạt động…" data-i18n-placeholder="filter.searchPlaceholder" autocomplete="off">
+            </div>
+          </div>
+          <div class="table-scroll jobs-scroll">
+            <table class="jtable" id="jobsTable">
+              <thead>
+                <tr>
+                  <th data-sort="status" data-i18n="table.status">Trạng thái</th>
+                  <th data-sort="name" data-i18n="table.name">Tên job</th>
+                  <th data-sort="project" data-i18n="table.project">Dự án</th>
+                  <th data-sort="model" data-i18n="table.model">Model</th>
+                  <th data-sort="kind" data-i18n="table.kind">Loại</th>
+                  <th data-sort="startedAt" data-i18n="table.time">Thời gian</th>
+                  <th data-sort="steps" data-i18n="table.steps">Bước</th>
+                  <th data-sort="tokens" data-i18n="table.tokens">Token</th>
+                  <th data-sort="rating" data-i18n="table.rating">Đánh giá</th>
+                  <th data-sort="lastActivity" data-i18n="table.lastActivity">Hoạt động cuối</th>
+                  <th class="act-col" data-i18n="table.actions">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody id="jobsBody"><tr><td colspan="11"><div class="empty" data-i18n="jobs.loading">Đang tải công việc…</div></td></tr></tbody>
+            </table>
+          </div>
+          <div class="pager" id="jobsPager"></div>
+        </section>
+      </section>
+
+      <!-- Dòng thời gian -->
+      <section class="view" id="view-timeline" data-view="timeline" hidden>
+        <section class="card">
+          <header class="card-head">
+            <div><h2 data-i18n="card.timelineConcurrency">Số job chạy song song</h2></div>
+            <span class="legend" id="tlRangeInfo"></span>
+          </header>
+          <div class="chart" id="chartConcurrencyTl"></div>
+        </section>
+        <section class="card gantt-card">
+          <header class="card-head">
+            <div><h2 data-i18n="card.timeline">Dòng thời gian</h2></div>
+            <span class="legend" id="tlCount"></span>
+          </header>
+          <div class="gantt-wrap" id="ganttWrap"><div class="empty" data-i18n="timeline.loading">Đang tải dòng thời gian…</div></div>
+        </section>
+      </section>
+
+      <!-- Kế hoạch -->
+      <section class="view" id="view-plans" data-view="plans" hidden>
+        <div class="grid plan-grid">
+          <section class="card col-4 plans-list-card">
+            <header class="card-head">
+              <div><h2 data-i18n="card.plans">Kế hoạch</h2></div>
+              <span class="legend" id="plansCount"></span>
+            </header>
+            <div class="batch-list" id="plansList"><div class="empty" data-i18n="plans.loading">Đang tải kế hoạch…</div></div>
+          </section>
+          <section class="card col-8 plan-detail-card">
+            <header class="card-head">
+              <div><h2 id="planTitle" data-i18n="card.planDetail">Chi tiết kế hoạch</h2><p id="planSub"></p></div>
+              <span class="legend" id="planBadge"></span>
+            </header>
+            <div class="plan-actions" id="planActions" hidden></div>
+            <div class="plan-top">
+              <div class="plan-progress">
+                <div class="chart" id="planDonut"></div>
+              </div>
+              <div class="plan-waves-wrap"><div class="waves" id="planWaves"><div class="empty" data-i18n="plans.noneSelected">Chưa chọn kế hoạch</div></div></div>
+            </div>
+            <div class="plan-bars">
+              <h3><span data-i18n="plans.durations">Thời lượng từng job</span> <span class="mut" data-i18n="plans.seconds">(giây)</span></h3>
+              <div class="chart" id="planDurations"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Model -->
+      <section class="view" id="view-models" data-view="models" hidden>
+        <div class="kind-cards" id="kindCards"></div>
+        <div class="grid">
+          <section class="card col-7">
+            <header class="card-head">
+              <div><h2 data-i18n="card.scatter">Thành công vs thời gian</h2></div>
+              <span class="legend" id="modelsUpdated"></span>
+            </header>
+            <div class="chart" id="chartScatter"></div>
+          </section>
+          <section class="card col-5">
+            <header class="card-head">
+              <div><h2 data-i18n="card.jobsByModel">Số job theo model</h2></div>
+            </header>
+            <div class="chart" id="chartJobsByModel"></div>
+          </section>
+        </div>
+        <section class="card">
+          <header class="card-head">
+            <div><h2 data-i18n="card.models">Bảng model</h2></div>
+          </header>
+          <p class="note" data-i18n="models.note">
+            Điểm xếp hạng = chất lượng bench × độ ổn định (trừ job lỗi hạ tầng), trừ nhẹ theo thời gian chạy trung bình.
+            Đánh giá <b>Tốt</b> điều chỉnh chất lượng như quan sát thêm (không làm giảm), <b>Chưa tốt</b> luôn làm giảm.
+            Hạng (#) là thứ tự trong từng loại việc; model bị lỗi endpoint sẽ tạm bị bỏ qua trong 30 phút.
+          </p>
+          <div class="table-scroll">
+            <table class="mtable" id="modelsTable">
+              <thead id="modelHead"></thead>
+              <tbody id="modelBody"><tr><td colspan="15"><div class="empty" data-i18n="models.loading">Đang tải model…</div></td></tr></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <!-- Tiến trình -->
+      <section class="view" id="view-processes" data-view="processes" hidden>
+        <div class="grid">
+          <section class="card col-4">
+            <header class="card-head">
+              <div><h2 data-i18n="proc.byType">Theo loại</h2></div>
+              <span class="legend" id="procCount"></span>
+            </header>
+            <div class="chart" id="chartProcTypes"></div>
+            <div class="proc-machine" id="procMachine"></div>
+          </section>
+          <section class="card col-8">
+            <header class="card-head">
+              <div><h2 data-i18n="proc.running">Tiến trình đang chạy</h2></div>
+            </header>
+            <div class="orphan-hint" id="orphanHint" hidden></div>
+            <div id="procBody" class="proc-scroll"><div class="empty" data-i18n="proc.loading">Đang quét tiến trình…</div></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- Cài đặt -->
+      <section class="view" id="view-settings" data-view="settings" hidden>
+        <div class="settings-grid">
+          <div class="settings-col">
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.appearance">Giao diện</h2></div>
+              </header>
+              <div class="settings-list">
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.theme">Giao diện</b><span data-i18n="settings.themeHint">Kem sáng hoặc espresso tối</span></div>
+                  <button class="theme-switch" id="setTheme" type="button" role="switch" aria-checked="false" aria-label="Giao diện tối" data-i18n-aria="user.darkMode">
+                    <span class="ts-track"><span class="ts-knob">
+                      <svg class="icon-sun" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+                      <svg class="icon-moon" viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A8.5 8.5 0 1 1 11.2 3a6.6 6.6 0 0 0 9.8 9.8z"/></svg>
+                    </span></span>
+                  </button>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.language">Ngôn ngữ</b><span data-i18n="settings.languageHint">English hoặc Tiếng Việt</span></div>
+                  <div class="seg" id="setLang">
+                    <button type="button" data-lang="en" lang="en">EN</button>
+                    <button type="button" data-lang="vi" lang="vi">VI</button>
+                  </div>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.density">Mật độ</b><span data-i18n="settings.densityHint">Khoảng cách giữa các thẻ và danh sách</span></div>
+                  <div class="seg" id="setDensity">
+                    <button type="button" data-density="compact" data-i18n="settings.densityCompact">Gọn</button>
+                    <button type="button" data-density="comfortable" data-i18n="settings.densityComfortable">Thoải mái</button>
+                  </div>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.reducedMotion">Giảm chuyển động</b><span data-i18n="settings.reducedMotionHint">Hạn chế hiệu ứng chuyển động</span></div>
+                  <button class="switch" id="setReducedMotion" type="button" role="switch" aria-checked="false"><i></i><span data-i18n="common.off">tắt</span></button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.notifications">Thông báo</h2></div>
+              </header>
+              <div class="settings-list">
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.toast">Thông báo nhanh (toast) khi job xong/lỗi</b><span data-i18n="settings.toastHint">Hiện toast khi job kết thúc hoặc lỗi</span></div>
+                  <button class="switch" id="setToast" type="button" role="switch" aria-checked="true"><i></i><span data-i18n="common.on">bật</span></button>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.sound">Âm báo</b><span data-i18n="settings.soundHint">Tiếng chuông ngắn khi job kết thúc</span></div>
+                  <button class="switch" id="setSound" type="button" role="switch" aria-checked="false"><i></i><span data-i18n="common.off">tắt</span></button>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.notify">Thông báo desktop</b><span data-i18n="settings.notifyHint">Báo khi job kết thúc</span></div>
+                  <button class="switch" id="setNotify" type="button" role="switch" aria-checked="false"><i></i><span data-i18n="common.off">tắt</span></button>
+                </div>
+              </div>
+            </section>
+
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.dashboard">Dashboard</h2></div>
+              </header>
+              <div class="settings-list">
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.interval">Nhịp cập nhật</b><span data-i18n="settings.intervalHint">Khoảng cách giữa hai lần tải dữ liệu</span></div>
+                  <div class="seg" id="setInterval">
+                    <button type="button" data-interval="2">2</button>
+                    <button type="button" data-interval="5">5</button>
+                    <button type="button" data-interval="10">10</button>
+                  </div>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.range">Khoảng mặc định</b><span data-i18n="settings.rangeHint">Áp dụng cho biểu đồ và danh sách job</span></div>
+                  <div class="seg" id="setRange">
+                    <button type="button" data-range="today" data-i18n="range.today">Hôm nay</button>
+                    <button type="button" data-range="24h" data-i18n="range.24h">24 giờ</button>
+                    <button type="button" data-range="7d" data-i18n="range.7d">7 ngày</button>
+                  </div>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.sidebar">Thanh bên thu gọn</b><span data-i18n="settings.sidebarHint">Chỉ còn icon 72px, mở lại bất cứ lúc nào</span></div>
+                  <button class="switch" id="setSidebar" type="button" role="switch" aria-checked="false"><i></i><span data-i18n="common.off">tắt</span></button>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="settings.port">Cổng dashboard</b><span data-i18n="settings.portHint">Chỉ đọc</span></div>
+                  <span class="mono" id="settingsPort">4790</span>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <div class="settings-col">
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.machine">Máy này</h2></div>
+              </header>
+              <div class="settings-list" id="settingsMachine">
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="machine.cpu">Số nhân CPU</b></div>
+                  <span class="mono" id="machineCpu">—</span>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="machine.ram">RAM trống / tổng</b></div>
+                  <span class="mono" id="machineRam">—</span>
+                </div>
+                <div class="setrow">
+                  <div class="setinfo"><b data-i18n="machine.jobs">Job đang chạy / giới hạn</b></div>
+                  <span class="mono" id="machineJobs">—</span>
+                </div>
+              </div>
+            </section>
+
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.agents">Agent</h2></div>
+              </header>
+              <div class="agent-list" id="settingsAgents"></div>
+            </section>
+
+            <section class="card settings-card">
+              <header class="card-head">
+                <div><h2 data-i18n="settings.about">Giới thiệu</h2></div>
+              </header>
+              <div class="about-card">
+                <img src="/fox.png" alt="" width="56" height="56">
+                <div class="about-name">Maestro</div>
+                <div class="about-sub" data-i18n="about.madeBy">made by foxxiee</div>
+                <div class="doc-paths">
+                  <div class="doc-path">SKILL.md</div>
+                  <div class="doc-path">HUONG-DAN.md</div>
+                  <div class="doc-path">MAESTRO-PLAN.md</div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="overlay" id="drawerOverlay"></div>
+
+<aside class="drawer" id="drawer" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="dTitle">
+  <div class="drawer-head">
+    <div class="dh-main">
+      <div class="eyebrow" data-i18n="nav.jobs">Công việc</div>
+      <h2 id="dTitle">—</h2>
+      <div class="dstatus" id="dStatus"></div>
+    </div>
+    <button class="iconbtn" id="dClose" type="button" aria-label="Đóng" data-i18n-aria="common.close">×</button>
+  </div>
+
+  <div class="drawer-actions">
+    <button class="actbtn pause" id="dPause" type="button" hidden>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M9 5v14M15 5v14"/></svg>
+      <span data-i18n="job.pause">Tạm dừng</span>
+    </button>
+    <button class="actbtn stop" id="dStop" type="button" hidden data-i18n="job.stop">Dừng job</button>
+    <button class="actbtn good" id="dGood" type="button" data-i18n="rate.goodLabel">Tốt ✓</button>
+    <button class="actbtn bad" id="dBad" type="button" data-i18n="rate.badLabel">Chưa tốt ✗</button>
+    <button class="actbtn ghost" id="dCopy" type="button" data-i18n="job.copyId">Sao chép mã job</button>
+    <div class="ratingline">
+      <input id="dNote" type="text" maxlength="500" placeholder="Ghi chú đánh giá (tuỳ chọn)" data-i18n-placeholder="rate.note" autocomplete="off">
+      <span class="ratenow" id="dRateNow"></span>
+    </div>
+  </div>
+
+  <div class="dtabs" id="dTabs">
+    <button type="button" data-dtab="log" class="active" data-i18n="drawer.logs">Nhật ký</button>
+    <button type="button" data-dtab="brief">Brief</button>
+    <button type="button" data-dtab="detail" data-i18n="drawer.details">Chi tiết</button>
+  </div>
+
+  <div class="drawer-body">
+    <div class="dpanel" data-dpanel="log">
+      <div class="logs-head">
+        <h3 data-i18n="drawer.liveLog">Nhật ký trực tiếp</h3>
+        <span class="logn" id="logCount"></span>
+      </div>
+      <div class="log" id="logBox"></div>
+    </div>
+
+    <div class="dpanel" data-dpanel="brief" hidden>
+      <pre class="briefbox" id="briefBox" data-i18n="common.loading">Đang tải…</pre>
+    </div>
+
+    <div class="dpanel" data-dpanel="detail" hidden>
+      <div class="dmeta" id="dMeta"></div>
+      <div class="dsec" id="dAttempts"></div>
+      <div class="dsec" id="dHints"></div>
+      <div class="dsec" id="dFiles"></div>
+      <div class="dsec" id="dScope"></div>
+      <div class="dsec" id="dError"></div>
+      <div class="dsec" id="dFinal"></div>
+    </div>
+  </div>
+</aside>
+
+<aside class="notif-panel" id="notifPanel" hidden role="dialog" aria-modal="false" aria-labelledby="notifTitle">
+  <header class="np-head">
+    <h2 id="notifTitle" data-i18n="notif.title">Thông báo</h2>
+    <div class="np-actions">
+      <button type="button" id="notifRead" data-i18n="notif.markRead">Đánh dấu đã đọc</button>
+      <button type="button" id="notifClear" data-i18n="notif.clearAll">Xoá tất cả</button>
+    </div>
+  </header>
+  <div class="np-body" id="notifList"></div>
+</aside>
+
+<div class="gtip" id="gTip" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite" aria-atomic="false"></div>
+
+<div class="modal-backdrop" id="aboutBackdrop" hidden>
+  <div class="modal about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <button class="modal-close" id="aboutClose" type="button" aria-label="Đóng" data-i18n-aria="common.close">×</button>
+    <img class="about-img" src="/fox-full.webp" alt="">
+    <h2 id="aboutTitle" data-i18n="about.title">Maestro - AI Orchestra</h2>
+    <p class="about-sub" data-i18n="about.madeBy">made by foxxiee</p>
+    <p class="about-version" id="aboutVersion">opencode —</p>
+  </div>
+</div>
+<script src="/i18n.js" defer></script>
+<script src="/charts.js" defer></script>
+<script src="/app.js" defer></script>
+</body>
+</html>

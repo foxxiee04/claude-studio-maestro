@@ -1,0 +1,23 @@
+{
+  "name": "maestro",
+  "version": "0.2.0",
+  "description": "Maestro - the AI orchestra conductor for Claude Code: Claude plans and verifies, coding agents (opencode, Antigravity/Gemini, Ollama, Claude CLI, Codex) implement. Difficulty-based model routing, parallel jobs, fallbacks, research-backed model ranking, background dashboard app.",
+  "author": {
+    "name": "foxxiee"
+  },
+  "license": "MIT",
+  "keywords": [
+    "opencode",
+    "ollama",
+    "codex",
+    "antigravity",
+    "router",
+    "orchestration",
+    "dashboard",
+    "benchmark",
+    "gemini",
+    "agy"
+  ],
+  "homepage": "https://github.com/foxxiee04/claude-studio-maestro",
+  "repository": "https://github.com/foxxiee04/claude-studio-maestro"
+}

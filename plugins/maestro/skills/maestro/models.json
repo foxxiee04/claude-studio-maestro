@@ -1,0 +1,396 @@
+{
+  "version": 3,
+  "updated": "2026-10-29T00:32:42.668Z",
+  "models": {
+    "opencode/beam-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 43,
+          "status": "pass",
+          "tested": "2026-10-21"
+        },
+        "fix": {
+          "score": 1,
+          "passed": 4,
+          "total": 4,
+          "seconds": 45,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        },
+        "code": {
+          "score": 1,
+          "passed": 24,
+          "total": 24,
+          "seconds": 51,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        },
+        "ui": {
+          "score": 1,
+          "passed": 14,
+          "total": 14,
+          "seconds": 59,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        },
+        "hard": {
+          "score": 1,
+          "passed": 32,
+          "total": 32,
+          "seconds": 77,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        }
+      }
+    },
+    "opencode/big-pickle": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 61,
+          "status": "pass",
+          "tested": "2026-10-21"
+        }
+      }
+    },
+    "opencode/deepseek-v4.1-flash-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 49,
+          "status": "pass",
+          "tested": "2026-10-21"
+        }
+      },
+      "research": {
+        "quality": 0.79,
+        "basis": "DeepSeek V4-Flash: SWE-bench Verified ~79 (78.6 high mode), LiveCodeBench 88-92",
+        "sources": "flowhunt.io, datalearner.com",
+        "date": "2026-10-29"
+      }
+    },
+    "opencode/flint-40b-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 0,
+          "seconds": 115,
+          "status": "failed",
+          "tested": "2026-10-21"
+        },
+        "fix": {
+          "score": 0,
+          "passed": 0,
+          "total": 4,
+          "seconds": 241,
+          "status": "failed",
+          "error": "Upstream request failed: Endpoint is unavailable.",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        },
+        "code": {
+          "score": 0,
+          "passed": 0,
+          "total": 4,
+          "seconds": 241,
+          "status": "failed",
+          "error": "Upstream request failed: Endpoint is unavailable.",
+          "outOfScope": 0,
+          "skipped": true,
+          "tested": "2026-10-22"
+        },
+        "ui": {
+          "score": 0,
+          "passed": 0,
+          "total": 4,
+          "seconds": 241,
+          "status": "failed",
+          "error": "Upstream request failed: Endpoint is unavailable.",
+          "outOfScope": 0,
+          "skipped": true,
+          "tested": "2026-10-22"
+        }
+      }
+    },
+    "opencode/glm-5.3-flash-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 49,
+          "status": "pass",
+          "tested": "2026-10-21"
+        }
+      },
+      "research": {
+        "quality": 0.75,
+        "basis": "GLM-5.3-Flash: Terminal-Bench 2.1 84.3, DeepSWE v1.1 63.4 (vendor)",
+        "sources": "qubrid.com, benchlm.ai",
+        "date": "2026-10-29"
+      }
+    },
+    "opencode/longcat-2.5-preview-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 0,
+          "seconds": 114,
+          "status": "failed",
+          "tested": "2026-10-21"
+        }
+      }
+    },
+    "opencode/mimo-v2.6-flash-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 81,
+          "status": "pass",
+          "tested": "2026-10-21"
+        }
+      },
+      "research": {
+        "quality": 0.74,
+        "basis": "MiMo-V2.6-Flash: DeepSWE v1.1 67.9, Terminal-Bench 2.1 87.6 (vendor, not independently verified)",
+        "sources": "datalearner.com, benchlm.ai",
+        "date": "2026-10-29"
+      }
+    },
+    "opencode/minimax-m3.1-flash-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 53,
+          "status": "pass",
+          "tested": "2026-10-21"
+        },
+        "fix": {
+          "score": 1,
+          "passed": 4,
+          "total": 4,
+          "seconds": 125,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        },
+        "code": {
+          "score": 1,
+          "passed": 24,
+          "total": 24,
+          "seconds": 143,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        },
+        "ui": {
+          "score": 0.9,
+          "passed": 14,
+          "total": 14,
+          "seconds": 239,
+          "status": "done",
+          "outOfScope": 2,
+          "tested": "2026-10-22"
+        }
+      }
+    },
+    "opencode/nemotron-3-ultra-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 58,
+          "status": "pass",
+          "tested": "2026-10-21"
+        },
+        "fix": {
+          "score": 1,
+          "passed": 4,
+          "total": 4,
+          "seconds": 81,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        },
+        "code": {
+          "score": 0.958,
+          "passed": 23,
+          "total": 24,
+          "seconds": 146,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        },
+        "ui": {
+          "score": 1,
+          "passed": 14,
+          "total": 14,
+          "seconds": 84,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-22"
+        }
+      }
+    },
+    "opencode/nemotron-3.5-lightning-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 52,
+          "status": "pass",
+          "tested": "2026-10-21"
+        },
+        "fix": {
+          "score": 1,
+          "passed": 4,
+          "total": 4,
+          "seconds": 128,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        },
+        "code": {
+          "score": 1,
+          "passed": 24,
+          "total": 24,
+          "seconds": 269,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        },
+        "ui": {
+          "score": 0.9,
+          "passed": 14,
+          "total": 14,
+          "seconds": 342,
+          "status": "done",
+          "outOfScope": 1,
+          "tested": "2026-10-28"
+        },
+        "hard": {
+          "score": 0,
+          "passed": 0,
+          "total": 31,
+          "seconds": 490,
+          "status": "done",
+          "outOfScope": 0,
+          "tested": "2026-10-28"
+        }
+      },
+      "research": {
+        "quality": 0.55,
+        "basis": "Nemotron 3.5 Lightning (30B/3B active): SWE-bench Verified ~52-53",
+        "sources": "datacamp.com",
+        "date": "2026-10-29"
+      }
+    },
+    "opencode/nemotron-3.5-super-vl-free": {
+      "note": "",
+      "bench": {
+        "smoke": {
+          "score": 1,
+          "seconds": 49,
+          "status": "pass",
+          "tested": "2026-10-21"
+        }
+      },
+      "research": {
+        "quality": 0.65,
+        "basis": "Nemotron 3.5 Super (120B/12B): SWE-bench Pro ~51.8 (team member post)",
+        "sources": "linkedin (NVIDIA team)",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/claude-sonnet-4-6": {
+      "research": {
+        "quality": 0.8,
+        "basis": "Claude Sonnet 4.6: SWE-bench Verified 79.6",
+        "sources": "morphllm.com, benchlm.ai",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/gemini-3.8-flash-high": {
+      "research": {
+        "quality": 0.8,
+        "basis": "Gemini 3.8 Flash: DeepSWE v1.1 73.7, Terminal-Bench 2.1 ~89-91",
+        "sources": "datacamp.com, benchlm.ai, emergent.sh",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/gpt-oss-120b-medium": {
+      "research": {
+        "quality": 0.45,
+        "basis": "gpt-oss-120b: SWE-bench Verified 62.4 vendor, ~26 on the official leaderboard harness",
+        "sources": "NVIDIA NIM card, arXiv 2604.00362",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/gemini-3.8-flash-medium": {
+      "research": {
+        "quality": 0.76,
+        "basis": "Gemini 3.8 Flash at medium effort (high-effort scores minus a margin)",
+        "sources": "as above",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/gemini-3.8-flash-low": {
+      "research": {
+        "quality": 0.7,
+        "basis": "Gemini 3.8 Flash at low effort",
+        "sources": "as above",
+        "date": "2026-10-29"
+      }
+    },
+    "antigravity/claude-opus-4-6-thinking": {
+      "research": {
+        "quality": 0.82,
+        "basis": "Claude Opus 4.6: SWE-bench Verified 80.8",
+        "sources": "morphllm.com",
+        "date": "2026-10-29"
+      }
+    },
+    "codex/gpt-6-luna": {
+      "research": {
+        "quality": 0.72,
+        "basis": "GPT-6 Luna: DeepSWE v1.1 66.6 (OpenAI run), Coding Agent Index ~41",
+        "sources": "emergent.sh, benchlm.ai",
+        "date": "2026-10-29"
+      }
+    },
+    "claude/opus": {
+      "research": {
+        "quality": 0.95,
+        "basis": "Claude Opus 5.5: SWE-bench Pro 89.9",
+        "sources": "benchlm.ai, apidog.com",
+        "date": "2026-10-29"
+      }
+    },
+    "claude/sonnet": {
+      "research": {
+        "quality": 0.9,
+        "basis": "Claude Sonnet 5.5: SWE-bench Pro 81.3, Terminal-Bench 4.0 70.6",
+        "sources": "apidog.com, benchlm.ai",
+        "date": "2026-10-29"
+      }
+    },
+    "claude/haiku": {
+      "research": {
+        "quality": 0.75,
+        "basis": "Claude Haiku 5.5: no SWE-bench figure published; estimated below Sonnet 5.5",
+        "sources": "apidog.com (no independent results)",
+        "date": "2026-10-29"
+      }
+    }
+  },
+  "researchUpdated": "2026-10-29"
+}

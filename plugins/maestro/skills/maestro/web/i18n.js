@@ -1,0 +1,925 @@
+/* Maestro i18n - two dictionaries (en/vi), locale-aware numbers and dates.
+   Exposes window.I18n; loaded before charts.js and app.js. */
+(() => {
+  "use strict";
+
+  const en = {
+    "common.loading": "Loading…",
+    "common.empty": "Nothing here",
+    "common.noData": "No data",
+    "common.unknown": "Unknown",
+    "common.on": "on",
+    "common.off": "off",
+    "common.close": "Close",
+    "common.all": "All",
+    "common.refresh": "Refresh",
+    "about.madeBy": "made by foxxiee",
+    "about.title": "Maestro - AI Orchestra",
+
+    "time.justNow": "just now",
+    "time.minAgo": "{n} min ago",
+    "time.hoursAgo": "{n} h ago",
+    "time.daysAgo": "{n} d ago",
+
+    "window.controls": "Window controls",
+    "window.close": "Close",
+    "window.min": "Minimize",
+    "window.max": "Fullscreen",
+     "conn.updating": "Updating",
+     "conn.offline": "Disconnected",
+     "conn.live": "Live",
+    "conn.title": "Connection to dash-web",
+    "titlebar.slotsTitle": "Running / max parallel jobs",
+    "titlebar.clockTitle": "Current time",
+    "theme.toggleTitle": "Toggle light/dark",
+    "theme.toDark": "Dark mode",
+    "theme.toLight": "Light mode",
+    "user.idle": "Idle",
+    "user.runningJobs": "{n} running jobs",
+    "user.darkMode": "Dark mode",
+    "user.about": "About Maestro",
+
+    "nav.aria": "Dashboard navigation",
+    "nav.overview": "Overview",
+    "nav.jobs": "Jobs",
+    "nav.timeline": "Timeline",
+    "nav.plans": "Plans",
+    "nav.models": "Models",
+    "nav.processes": "Processes",
+    "nav.settings": "Settings",
+    "sidebar.open": "Open sidebar",
+    "sidebar.collapse": "Collapse sidebar",
+    "sidebar.versionTitle": "opencode version",
+    "sidebar.collapsedToast": "Sidebar collapsed",
+    "sidebar.expandedToast": "Sidebar expanded",
+
+    "lang.label": "Language",
+    "lang.hint": "English or Vietnamese",
+
+    "search.placeholder": "Find jobs, job IDs…  ( / )",
+    "search.aria": "Search jobs",
+    "search.empty": "No jobs found.",
+    "range.aria": "Time range",
+    "range.today": "Today",
+    "range.24h": "24 hours",
+    "range.7d": "7 days",
+    "refresh.label": "updated",
+    "refresh.every": "every {n}s",
+
+    "kpi.running": "Running",
+    "kpi.runningSub": "parallel jobs",
+    "kpi.done": "Done",
+    "kpi.doneSub": "completed jobs",
+    "kpi.failed": "Failed",
+    "kpi.failedSub": "errors, stalls, timeouts",
+    "kpi.success": "Success rate",
+    "kpi.successSub": "of finished jobs",
+    "kpi.tokens": "Tokens",
+    "kpi.tokensSub": "total used",
+    "kpi.avg": "Avg duration",
+    "kpi.avgSub": "per finished job",
+    "legend.done": "done",
+    "legend.failed": "failed",
+    "legend.other": "other",
+    "legend.running": "running",
+    "chart.job": "job",
+    "chart.jobs": "jobs",
+    "chart.parallel": "parallel jobs",
+    "chart.total": "total",
+    "chart.sum": "Total",
+    "chart.seconds": "seconds",
+
+    "status.running": "Running",
+    "status.done": "Done",
+    "status.failed": "Failed",
+    "status.timeout": "Timeout",
+    "status.stalled": "Stalled",
+    "status.blocked": "Blocked",
+    "status.stopped": "Stopped",
+    "status.lost": "Lost",
+    "status.pending": "Pending",
+    "status.skipped": "Skipped",
+    "status.paused": "Paused",
+
+    "kind.quick": "Quick tasks",
+    "kind.code": "Code",
+    "kind.ui": "Interface",
+    "kind.hard": "Hard tasks",
+
+    "card.jobsByHour": "Jobs by hour",
+    "card.status": "Status",
+    "card.tokensByModel": "Tokens by model",
+    "card.concurrency": "Parallel jobs",
+    "card.running": "Running",
+    "card.recent": "Recent activity",
+    "card.scatter": "Success vs duration",
+    "card.jobsByModel": "Jobs per model",
+    "card.models": "Model table",
+    "card.timeline": "Timeline",
+    "card.timelineConcurrency": "Parallel jobs",
+    "card.plans": "Plans",
+    "card.planDetail": "Plan details",
+    "card.byType": "By type",
+    "card.processes": "Running processes",
+
+    "live.count": "{n} running",
+    "live.empty": "No running jobs",
+    "live.silent": "silent 2 min",
+    "live.time": "time",
+    "live.steps": "steps",
+    "live.tokens": "tokens",
+    "feed.empty": "No activity in this range.",
+    "event.start": "started",
+    "event.done": "finished",
+    "event.failed": "failed",
+    "event.rated": "rated",
+    "rating.good": "good",
+    "rating.bad": "not good",
+    "rating.title": "Rated good",
+    "rating.badTitle": "Rated not good",
+    "scope.out": "Out of scope: {list}",
+
+    "job.pause": "Pause",
+    "job.resume": "Resume",
+    "job.stop": "Stop job",
+    "job.pauseTitle": "A short pause is safe. A long pause may drop the model connection; the job then restarts on a fallback model.",
+    "job.resumeTitle": "Resume this paused job",
+    "job.stopTitle": "Stop the job and its child processes",
+    "job.copyId": "Copy job ID",
+    "job.copied": "Job ID copied",
+    "job.copyFailed": "Could not copy the job ID",
+    "job.batch": "batch {n}",
+
+    "jobs.count": "{n} jobs",
+    "jobs.loading": "Loading jobs…",
+    "jobs.empty": "No jobs match the filters",
+    "filter.project": "Project",
+    "filter.status": "Status",
+    "filter.model": "Model",
+    "filter.kind": "Kind",
+    "filter.search": "Search table",
+    "filter.allProjects": "All projects",
+    "filter.allModels": "All models",
+    "filter.all": "All",
+    "filter.searchPlaceholder": "Job name, model, activity…",
+    "table.status": "Status",
+    "table.name": "Job name",
+    "table.project": "Project",
+    "table.model": "Model",
+    "table.kind": "Kind",
+    "table.time": "Time",
+    "table.steps": "Steps",
+    "table.tokens": "Tokens",
+    "table.rating": "Rating",
+    "table.lastActivity": "Last activity",
+    "table.actions": "Actions",
+    "chip.running": "Running",
+    "chip.done": "Done",
+    "chip.failed": "Failed",
+    "chip.other": "Other",
+    "chip.delta": "Delta",
+    "pager.info": "{total} jobs · page {page}/{pages}",
+    "pager.prev": "‹ Prev",
+    "pager.next": "Next ›",
+
+    "timeline.loading": "Loading timeline…",
+    "timeline.empty": "No jobs in the last {hours} hours",
+    "timeline.jobs": "{n} jobs",
+    "timeline.now": "now",
+    "timeline.project": "Project",
+    "timeline.laneCount": "{n} jobs",
+    "timeline.rangeToday": "today",
+    "timeline.range24": "24 hours",
+    "timeline.range7": "7 days",
+    "timeline.buckets": "{n} buckets",
+
+    "plans.loading": "Loading plans…",
+    "plans.count": "{n} latest plans",
+    "plans.empty": "No plans yet",
+    "plans.detailTitle": "Plan details",
+    "plans.selectHint": "Select a plan on the left",
+    "plans.noneSelected": "No plan selected",
+    "plans.durations": "Duration per job",
+    "plans.seconds": "(s)",
+    "plans.jobsDone": "jobs done",
+    "plans.wave": "Wave {n}",
+    "plans.waveJobs": "{n} jobs",
+    "plans.noWaves": "This plan has no waves",
+    "plans.noJobs": "No jobs",
+    "plans.pause": "Pause plan",
+    "plans.resume": "Resume plan",
+    "plans.pauseTitle": "Running jobs continue; no new job starts until you resume.",
+    "plans.resumeTitle": "Resume so waiting jobs can run.",
+    "plans.started": "started {time}",
+
+    "models.loading": "Loading models…",
+    "models.empty": "No model data yet",
+    "models.updated": "bench: {date}",
+    "models.notRanked": "Not ranked",
+    "models.dead": "Skipped",
+    "models.ready": "Ready",
+    "models.deadTitle": "Recent endpoint errors; skipped until {time}",
+    "models.skipped": "skipped",
+    "models.successSub": "{pct} success · {dur} · {n} jobs",
+    "models.xLabel": "success rate (%)",
+    "models.seconds": "seconds",
+    "models.sortBy": "Sort by {label}",
+    "models.note": "Ranking score = bench quality × stability (excluding infra failures), minus a small penalty for average runtime. A Good rating adjusts quality upward as extra evidence; Not good always lowers it. Rank (#) is per job kind; models with recent endpoint errors are skipped for 30 minutes.",
+    "col.jobs": "Jobs",
+    "col.success": "Success",
+    "col.infra": "Infra",
+    "col.good": "Good",
+    "col.bad": "Not good",
+    "col.avg": "Avg",
+    "col.status": "Status",
+
+    "proc.byType": "By type",
+    "proc.running": "Running processes",
+    "proc.loading": "Scanning processes…",
+    "proc.empty": "No node, opencode, PowerShell or Claude processes running",
+    "proc.count": "{n} processes",
+    "proc.orphan": "{n} opencode processes are still alive after their job ended (display only, never killed)",
+    "proc.orphanPill": "orphan",
+    "proc.table.type": "Type",
+    "proc.table.pid": "PID",
+    "proc.table.ppid": "Parent PID",
+    "proc.table.time": "Time",
+    "proc.table.cmd": "Command",
+    "proc.children": "{n} children",
+    "proc.processes": "processes",
+
+    "settings.title": "Settings",
+    "settings.notify": "Desktop notifications",
+    "settings.notifyHint": "Alert when a job finishes",
+    "settings.sound": "Sound",
+    "settings.soundHint": "Short chime when a job finishes",
+    "settings.theme": "Theme",
+    "settings.themeHint": "Cream light or espresso dark",
+    "settings.light": "Light",
+    "settings.dark": "Dark",
+    "settings.interval": "Refresh interval",
+    "settings.intervalHint": "Time between data loads",
+    "settings.seconds": "{n} seconds",
+    "settings.range": "Default range",
+    "settings.rangeHint": "Used by charts and the job list",
+    "settings.sidebar": "Collapsed sidebar",
+    "settings.sidebarHint": "Icon rail only; reopen anytime",
+    "settings.language": "Language",
+    "settings.languageHint": "English or Vietnamese",
+    "settings.appearance": "Appearance",
+    "settings.appearanceHint": "Look and feel of the dashboard",
+    "settings.notifications": "Notifications",
+    "settings.notificationsHint": "Alerts and sounds",
+    "settings.dashboard": "Dashboard",
+    "settings.dashboardHint": "Refresh and layout",
+    "settings.density": "Density",
+    "settings.densityHint": "Spacing of cards and lists",
+    "settings.densityCompact": "Compact",
+    "settings.densityComfortable": "Comfortable",
+    "settings.reducedMotion": "Reduced motion",
+    "settings.reducedMotionHint": "Minimize animations",
+    "settings.toast": "Toast on job done/failed",
+    "settings.toastHint": "Show a toast when a job finishes or fails",
+    "settings.port": "Dashboard port",
+    "settings.portHint": "Read-only",
+    "settings.machine": "This machine",
+    "settings.agents": "Agents",
+    "settings.about": "About",
+    "settings.docs": "Docs",
+     "machine.cpu": "CPU cores",
+     "machine.cpuBusy": "CPU busy",
+     "machine.ram": "RAM free / total",
+     "machine.jobs": "Running jobs / limit",
+    "machine.unavailable": "Unavailable",
+
+    "drawer.logs": "Logs",
+    "drawer.details": "Details",
+    "drawer.liveLog": "Live log",
+    "drawer.lines": "{n} lines",
+    "drawer.noLog": "(no log yet)",
+    "drawer.loadingBrief": "Loading brief…",
+    "drawer.noBrief": "No brief.md for this job",
+    "drawer.briefError": "Could not read the brief",
+    "drawer.empty": "(empty)",
+    "meta.model": "Model",
+    "meta.kind": "Kind",
+    "meta.dir": "Folder",
+    "meta.time": "Time",
+    "meta.start": "Started",
+    "meta.scope": "Scope",
+    "meta.steps": "Steps",
+    "meta.tokens": "Tokens",
+    "meta.files": "Files written",
+    "meta.rating": "Rating",
+    "meta.wholeFolder": "whole folder",
+    "meta.running": "running",
+    "meta.paused": "paused",
+    "meta.ratedGood": "✓ good",
+    "meta.ratedBad": "✗ not good",
+    "meta.notRated": "not rated",
+    "attempts.title": "Attempt chain (fallback)",
+    "attempts.chain": "Model chain",
+    "attempts.hint": "Tried {n} times; current model is {model}.",
+    "attempts.chainHint": "Models after the first are fallbacks when the previous one hits an infra error.",
+    "attempts.none": "{model} (no fallback)",
+    "hints.paused": "Job paused: timeout and stall clocks are stopped. A short pause is safe; a long pause may drop the model connection and the job restarts on a fallback model.",
+    "hints.blocked": "Job blocked by permissions: allow the needed action in the project's opencode.json (do not use --auto), or edit the brief so it no longer needs it.",
+    "hints.denied": "{n} commands were denied by permission rules (paths outside the project or Git actions); the job kept running.",
+    "hints.scope": "{n} files are out of scope — review carefully before rating good.",
+    "files.title": "Files written ({n})",
+    "files.scopeTitle": "Out of scope ({n})",
+    "files.none": "No files written",
+    "files.noScope": "No files out of scope",
+    "files.dir": "Folder:",
+    "files.open": "Open in VS Code",
+    "files.openDir": "Open folder",
+    "error.title": "Error",
+    "final.title": "Final message from opencode",
+    "final.none": "No final message yet",
+    "rate.nowGood": "rating: good ✓",
+    "rate.nowBad": "rating: not good ✗",
+    "rate.nowNone": "not rated",
+    "rate.goodLabel": "Good ✓",
+    "rate.badLabel": "Not good ✗",
+    "rate.note": "Rating note (optional)",
+    "rate.saved": "Rating saved",
+    "rate.failed": "Could not save rating: {msg}",
+
+    "confirm.stop": "Stop job \"{name}\"? opencode and its child processes will be killed.",
+
+    "toast.jobUpdated": "Job updated",
+    "toast.planUpdated": "Plan updated",
+    "toast.actionFailed": "Could not complete: {msg}",
+    "toast.compactOn": "Compact mode: icon rail, tighter cards",
+    "toast.compactOff": "Full layout restored",
+    "toast.closeWindow": "Close the window with the OS close button",
+    "toast.fsUnsupported": "This browser blocked fullscreen",
+    "toast.fsFailed": "Could not enter fullscreen",
+    "toast.notifyUnsupported": "This browser does not support desktop notifications",
+    "toast.notifyOn": "Desktop notifications on",
+    "toast.notifyPending": "Notification permission not granted yet — accept the browser prompt",
+    "toast.notifyDenied": "Notification permission denied — enable it in browser settings",
+    "toast.notifyOff": "Desktop notifications off",
+    "toast.soundOn": "Sound on",
+    "toast.soundOff": "Sound off",
+    "toast.interval": "Refreshing every {n}s",
+    "toast.jobStarted": "Job started",
+    "toast.jobDone": "Job finished",
+    "toast.jobFailed": "Job failed",
+    "toast.jobPaused": "Job paused",
+    "toast.jobResumed": "Job resumed",
+
+    "notif.title": "Notifications",
+    "notif.markRead": "Mark as read",
+    "notif.clearAll": "Clear all",
+    "notif.empty": "No notifications yet",
+    "notif.today": "Today",
+    "notif.earlier": "Earlier",
+    "notif.bell": "Notifications",
+    "notif.started": "started",
+    "notif.finished": "finished",
+    "notif.failed": "failed",
+    "notif.paused": "paused",
+    "notif.resumed": "resumed",
+    "notif.rated": "rated",
+
+    "chart.noData": "No data",
+    "chart.drawFailed": "Could not draw the chart",
+    "chart.hourly": "Jobs by hour",
+    "chart.barAria": "Bar chart",
+    "chart.hbarAria": "Horizontal bar chart",
+    "chart.donutAria": "Donut chart",
+    "chart.areaAria": "Area chart",
+    "chart.scatterAria": "Scatter chart",
+    "chart.sparkAria": "Sparkline",
+  };
+
+  const vi = {
+    "common.loading": "Đang tải…",
+    "common.empty": "Chưa có gì",
+    "common.noData": "Chưa có dữ liệu",
+    "common.unknown": "không rõ",
+    "common.on": "bật",
+    "common.off": "tắt",
+    "common.close": "Đóng",
+    "common.all": "Tất cả",
+    "common.refresh": "Làm mới",
+    "about.madeBy": "made by foxxiee",
+    "about.title": "Maestro - AI Orchestra",
+
+    "time.justNow": "vừa xong",
+    "time.minAgo": "{n} phút trước",
+    "time.hoursAgo": "{n} giờ trước",
+    "time.daysAgo": "{n} ngày trước",
+
+    "window.controls": "Điều khiển cửa sổ",
+    "window.close": "Đóng",
+    "window.min": "Thu gọn",
+    "window.max": "Toàn màn hình",
+     "conn.updating": "Đang cập nhật",
+     "conn.offline": "Mất kết nối",
+     "conn.live": "Trực tiếp",
+    "conn.title": "Trạng thái kết nối tới dash-web",
+    "titlebar.slotsTitle": "Job đang chạy / song song tối đa",
+    "titlebar.clockTitle": "Giờ hiện tại",
+    "theme.toggleTitle": "Đổi nền sáng/tối",
+    "theme.toDark": "Nền tối",
+    "theme.toLight": "Nền sáng",
+    "user.idle": "Rảnh",
+    "user.runningJobs": "{n} job đang chạy",
+    "user.darkMode": "Giao diện tối",
+    "user.about": "Giới thiệu Maestro",
+
+    "nav.aria": "Điều hướng bảng điều khiển",
+    "nav.overview": "Tổng quan",
+    "nav.jobs": "Công việc",
+    "nav.timeline": "Dòng thời gian",
+    "nav.plans": "Kế hoạch",
+    "nav.models": "Model",
+    "nav.processes": "Tiến trình",
+    "nav.settings": "Cài đặt",
+    "sidebar.open": "Mở thanh bên",
+    "sidebar.collapse": "Thu gọn thanh bên",
+    "sidebar.versionTitle": "Phiên bản opencode",
+    "sidebar.collapsedToast": "Đã thu gọn thanh bên",
+    "sidebar.expandedToast": "Đã mở thanh bên",
+
+    "lang.label": "Ngôn ngữ",
+    "lang.hint": "English hoặc Tiếng Việt",
+
+    "search.placeholder": "Tìm job, mã job…  ( / )",
+    "search.aria": "Tìm công việc",
+    "search.empty": "Không tìm thấy job.",
+    "range.aria": "Khoảng thời gian",
+    "range.today": "Hôm nay",
+    "range.24h": "24 giờ",
+    "range.7d": "7 ngày",
+    "refresh.label": "cập nhật",
+    "refresh.every": "mỗi {n} giây",
+
+    "kpi.running": "Đang chạy",
+    "kpi.runningSub": "job song song",
+    "kpi.done": "Hoàn tất",
+    "kpi.doneSub": "job kết thúc tốt",
+    "kpi.failed": "Lỗi",
+    "kpi.failedSub": "lỗi, treo, quá hạn",
+    "kpi.success": "Tỉ lệ thành công",
+    "kpi.successSub": "trong số job đã xong",
+    "kpi.tokens": "Token",
+    "kpi.tokensSub": "tổng token đã dùng",
+    "kpi.avg": "Thời gian TB",
+    "kpi.avgSub": "mỗi job đã xong",
+    "legend.done": "hoàn tất",
+    "legend.failed": "lỗi",
+    "legend.other": "khác",
+    "legend.running": "đang chạy",
+    "chart.job": "job",
+    "chart.jobs": "job",
+    "chart.parallel": "job song song",
+    "chart.total": "tổng",
+    "chart.sum": "Tổng",
+    "chart.seconds": "giây",
+
+    "status.running": "Đang chạy",
+    "status.done": "Hoàn tất",
+    "status.failed": "Lỗi",
+    "status.timeout": "Quá hạn",
+    "status.stalled": "Treo",
+    "status.blocked": "Bị chặn",
+    "status.stopped": "Đã dừng",
+    "status.lost": "Mất dấu",
+    "status.pending": "Chờ",
+    "status.skipped": "Bỏ qua",
+    "status.paused": "Tạm dừng",
+
+    "kind.quick": "việc nhanh",
+    "kind.code": "viết code",
+    "kind.ui": "giao diện",
+    "kind.hard": "việc khó",
+
+    "card.jobsByHour": "Job theo giờ",
+    "card.status": "Trạng thái",
+    "card.tokensByModel": "Token theo model",
+    "card.concurrency": "Số job chạy song song",
+    "card.running": "Đang chạy",
+    "card.recent": "Hoạt động gần đây",
+    "card.scatter": "Thành công vs thời gian",
+    "card.jobsByModel": "Số job theo model",
+    "card.models": "Bảng model",
+    "card.timeline": "Dòng thời gian",
+    "card.timelineConcurrency": "Số job chạy song song",
+    "card.plans": "Kế hoạch",
+    "card.planDetail": "Chi tiết kế hoạch",
+    "card.byType": "Theo loại",
+    "card.processes": "Tiến trình đang chạy",
+
+    "live.count": "{n} job đang chạy",
+    "live.empty": "Không có job nào đang chạy",
+    "live.silent": "im lặng 2 phút",
+    "live.time": "thời gian",
+    "live.steps": "bước",
+    "live.tokens": "token",
+    "feed.empty": "Chưa có hoạt động trong khoảng này.",
+    "event.start": "bắt đầu",
+    "event.done": "hoàn tất",
+    "event.failed": "lỗi",
+    "event.rated": "đánh giá",
+    "rating.good": "tốt",
+    "rating.bad": "chưa tốt",
+    "rating.title": "Đánh giá tốt",
+    "rating.badTitle": "Chưa tốt",
+    "scope.out": "Ngoài phạm vi: {list}",
+
+    "job.pause": "Tạm dừng",
+    "job.resume": "Tiếp tục",
+    "job.stop": "Dừng job",
+    "job.pauseTitle": "Tạm dừng ngắn là an toàn. Dừng lâu có thể làm model mất kết nối; khi đó job tự chạy lại bằng model dự phòng.",
+    "job.resumeTitle": "Tiếp tục job đang tạm dừng",
+    "job.stopTitle": "Dừng job và các tiến trình con",
+    "job.copyId": "Sao chép mã job",
+    "job.copied": "Đã sao chép mã job",
+    "job.copyFailed": "Không sao chép được mã job",
+    "job.batch": "đợt {n}",
+
+    "jobs.count": "{n} công việc",
+    "jobs.loading": "Đang tải công việc…",
+    "jobs.empty": "Không có job nào khớp bộ lọc",
+    "filter.project": "Dự án",
+    "filter.status": "Trạng thái",
+    "filter.model": "Model",
+    "filter.kind": "Loại",
+    "filter.search": "Tìm trong bảng",
+    "filter.allProjects": "Mọi dự án",
+    "filter.allModels": "Mọi model",
+    "filter.all": "Tất cả",
+    "filter.searchPlaceholder": "Tên job, model, hoạt động…",
+    "table.status": "Trạng thái",
+    "table.name": "Tên job",
+    "table.project": "Dự án",
+    "table.model": "Model",
+    "table.kind": "Loại",
+    "table.time": "Thời gian",
+    "table.steps": "Bước",
+    "table.tokens": "Token",
+    "table.rating": "Đánh giá",
+    "table.lastActivity": "Hoạt động cuối",
+    "table.actions": "Thao tác",
+    "chip.running": "Đang chạy",
+    "chip.done": "Hoàn tất",
+    "chip.failed": "Lỗi",
+    "chip.other": "Khác",
+    "chip.delta": "Chênh lệch",
+    "pager.info": "{total} job · trang {page}/{pages}",
+    "pager.prev": "‹ Trước",
+    "pager.next": "Sau ›",
+
+    "timeline.loading": "Đang tải dòng thời gian…",
+    "timeline.empty": "Không có job nào trong {hours} giờ qua",
+    "timeline.jobs": "{n} job",
+    "timeline.now": "bây giờ",
+    "timeline.project": "Dự án",
+    "timeline.laneCount": "{n} job",
+    "timeline.rangeToday": "hôm nay",
+    "timeline.range24": "24 giờ",
+    "timeline.range7": "7 ngày",
+    "timeline.buckets": "{n} mốc",
+
+    "plans.loading": "Đang tải kế hoạch…",
+    "plans.count": "{n} kế hoạch gần nhất",
+    "plans.empty": "Chưa có kế hoạch",
+    "plans.detailTitle": "Chi tiết kế hoạch",
+    "plans.selectHint": "Chọn một kế hoạch ở cột bên trái",
+    "plans.noneSelected": "Chưa chọn kế hoạch",
+    "plans.durations": "Thời lượng từng job",
+    "plans.seconds": "(giây)",
+    "plans.jobsDone": "job xong",
+    "plans.wave": "Đợt {n}",
+    "plans.waveJobs": "{n} job",
+    "plans.noWaves": "Kế hoạch này không có đợt nào",
+    "plans.noJobs": "Không có job",
+    "plans.pause": "Tạm dừng kế hoạch",
+    "plans.resume": "Tiếp tục kế hoạch",
+    "plans.pauseTitle": "Job đang chạy vẫn tiếp tục; không có job mới nào bắt đầu cho tới khi bạn tiếp tục.",
+    "plans.resumeTitle": "Tiếp tục để các job chờ được chạy tiếp.",
+    "plans.started": "bắt đầu {time}",
+
+    "models.loading": "Đang tải model…",
+    "models.empty": "Chưa có dữ liệu model",
+    "models.updated": "bench: {date}",
+    "models.notRanked": "Chưa xếp hạng",
+    "models.dead": "Tạm bỏ qua",
+    "models.ready": "Sẵn sàng",
+    "models.deadTitle": "Lỗi endpoint gần đây; tạm bỏ qua đến {time}",
+    "models.skipped": "bỏ qua",
+    "models.successSub": "{pct} thành công · {dur} · {n} job",
+    "models.xLabel": "tỉ lệ thành công (%)",
+    "models.seconds": "giây",
+    "models.sortBy": "Sắp xếp theo {label}",
+    "models.note": "Điểm xếp hạng = chất lượng bench × độ ổn định (trừ job lỗi hạ tầng), trừ nhẹ theo thời gian chạy trung bình. Đánh giá Tốt điều chỉnh chất lượng như quan sát thêm (không làm giảm), Chưa tốt luôn làm giảm. Hạng (#) là thứ tự trong từng loại việc; model bị lỗi endpoint sẽ tạm bị bỏ qua trong 30 phút.",
+    "col.jobs": "Job",
+    "col.success": "Thành công",
+    "col.infra": "Hạ tầng",
+    "col.good": "Tốt",
+    "col.bad": "Chưa tốt",
+    "col.avg": "TB",
+    "col.status": "Trạng thái",
+
+    "proc.byType": "Theo loại",
+    "proc.running": "Tiến trình đang chạy",
+    "proc.loading": "Đang quét tiến trình…",
+    "proc.empty": "Không thấy tiến trình node, opencode, PowerShell hay Claude nào đang chạy",
+    "proc.count": "{n} tiến trình",
+    "proc.orphan": "{n} tiến trình opencode vẫn còn sống dù job đã kết thúc (chỉ hiển thị, không tự tắt)",
+    "proc.orphanPill": "mồ côi",
+    "proc.table.type": "Loại",
+    "proc.table.pid": "PID",
+    "proc.table.ppid": "PID cha",
+    "proc.table.time": "Thời gian",
+    "proc.table.cmd": "Dòng lệnh",
+    "proc.children": "{n} con",
+    "proc.processes": "tiến trình",
+
+    "settings.title": "Cài đặt",
+    "settings.notify": "Thông báo desktop",
+    "settings.notifyHint": "Báo khi job kết thúc",
+    "settings.sound": "Âm báo",
+    "settings.soundHint": "Tiếng chuông ngắn khi job kết thúc",
+    "settings.theme": "Giao diện",
+    "settings.themeHint": "Kem sáng hoặc espresso tối",
+    "settings.light": "Sáng",
+    "settings.dark": "Tối",
+    "settings.interval": "Nhịp cập nhật",
+    "settings.intervalHint": "Khoảng cách giữa hai lần tải dữ liệu",
+    "settings.seconds": "{n} giây",
+    "settings.range": "Khoảng mặc định",
+    "settings.rangeHint": "Áp dụng cho biểu đồ và danh sách job",
+    "settings.sidebar": "Thanh bên thu gọn",
+    "settings.sidebarHint": "Chỉ còn icon 72px, mở lại bất cứ lúc nào",
+    "settings.language": "Ngôn ngữ",
+    "settings.languageHint": "English hoặc Tiếng Việt",
+    "settings.appearance": "Giao diện",
+    "settings.appearanceHint": "Giao diện và cảm nhận",
+    "settings.notifications": "Thông báo",
+    "settings.notificationsHint": "Cảnh báo và âm thanh",
+    "settings.dashboard": "Dashboard",
+    "settings.dashboardHint": "Tần suất và bố cục",
+    "settings.density": "Mật độ",
+    "settings.densityHint": "Khoảng cách giữa các thẻ và danh sách",
+    "settings.densityCompact": "Gọn",
+    "settings.densityComfortable": "Thoải mái",
+    "settings.reducedMotion": "Giảm chuyển động",
+    "settings.reducedMotionHint": "Hạn chế hiệu ứng chuyển động",
+    "settings.toast": "Thông báo nhanh (toast) khi job xong/lỗi",
+    "settings.toastHint": "Hiện toast khi job kết thúc hoặc lỗi",
+    "settings.port": "Cổng dashboard",
+    "settings.portHint": "Chỉ đọc",
+    "settings.machine": "Máy này",
+    "settings.agents": "Agent",
+    "settings.about": "Giới thiệu",
+    "settings.docs": "Tài liệu",
+     "machine.cpu": "Số nhân CPU",
+     "machine.cpuBusy": "CPU bận",
+     "machine.ram": "RAM trống / tổng",
+     "machine.jobs": "Job đang chạy / giới hạn",
+    "machine.unavailable": "Không khả dụng",
+
+    "drawer.logs": "Nhật ký",
+    "drawer.details": "Chi tiết",
+    "drawer.liveLog": "Nhật ký trực tiếp",
+    "drawer.lines": "{n} dòng",
+    "drawer.noLog": "(chưa có nhật ký)",
+    "drawer.loadingBrief": "Đang tải brief…",
+    "drawer.noBrief": "Không có brief.md cho job này",
+    "drawer.briefError": "Không đọc được brief.",
+    "drawer.empty": "(trống)",
+    "meta.model": "Model",
+    "meta.kind": "Loại",
+    "meta.dir": "Thư mục",
+    "meta.time": "Thời gian",
+    "meta.start": "Bắt đầu",
+    "meta.scope": "Phạm vi",
+    "meta.steps": "Bước",
+    "meta.tokens": "Token",
+    "meta.files": "Tệp đã ghi",
+    "meta.rating": "Đánh giá",
+    "meta.wholeFolder": "toàn thư mục",
+    "meta.running": "đang chạy",
+    "meta.paused": "tạm dừng",
+    "meta.ratedGood": "✓ tốt",
+    "meta.ratedBad": "✗ chưa tốt",
+    "meta.notRated": "chưa đánh giá",
+    "attempts.title": "Chuỗi thử (fallback)",
+    "attempts.chain": "Chuỗi mô hình",
+    "attempts.hint": "Đã thử {n} lần; mô hình hiện tại là {model}.",
+    "attempts.chainHint": "Mô hình đứng sau là phương án dự phòng khi mô hình trước lỗi hạ tầng.",
+    "attempts.none": "{model} (không có dự phòng)",
+    "hints.paused": "Job đang tạm dừng: đồng hồ timeout và stall đã dừng. Tạm dừng ngắn là an toàn; dừng lâu có thể làm model mất kết nối và job sẽ tự chạy lại bằng model dự phòng.",
+    "hints.blocked": "Job bị chặn quyền: mở opencode.json của dự án và cho phép thao tác cần thiết (đừng dùng --auto), hoặc sửa brief để không cần thao tác đó.",
+    "hints.denied": "{n} lệnh bị từ chối bởi quy tắc quyền (đường dẫn ngoài dự án hoặc thao tác Git); job vẫn chạy tiếp.",
+    "hints.scope": "Có {n} tệp ngoài phạm vi — kiểm tra kỹ trước khi đánh giá tốt.",
+    "files.title": "Tệp đã ghi ({n})",
+    "files.scopeTitle": "Ngoài phạm vi ({n})",
+    "files.none": "Chưa ghi tệp nào",
+    "files.noScope": "Không có tệp nào ngoài phạm vi",
+    "files.dir": "Thư mục:",
+    "files.open": "Mở trong VS Code",
+    "files.openDir": "Mở thư mục",
+    "error.title": "Lỗi",
+    "final.title": "Thông điệp cuối từ opencode",
+    "final.none": "Chưa có thông điệp cuối",
+    "rate.nowGood": "đánh giá: tốt ✓",
+    "rate.nowBad": "đánh giá: chưa tốt ✗",
+    "rate.nowNone": "chưa đánh giá",
+    "rate.goodLabel": "Tốt ✓",
+    "rate.badLabel": "Chưa tốt ✗",
+    "rate.note": "Ghi chú đánh giá (tuỳ chọn)",
+    "rate.saved": "Đã lưu đánh giá",
+    "rate.failed": "Không lưu được đánh giá: {msg}",
+
+    "confirm.stop": "Dừng job \"{name}\"? Tiến trình opencode và các tiến trình con sẽ bị tắt.",
+
+    "toast.jobUpdated": "Đã cập nhật job",
+    "toast.planUpdated": "Đã cập nhật kế hoạch",
+    "toast.actionFailed": "Không thực hiện được: {msg}",
+    "toast.compactOn": "Chế độ thu gọn: thanh bên thành icon, thẻ gọn hơn",
+    "toast.compactOff": "Đã trở lại bố cục đầy đủ",
+    "toast.closeWindow": "Đóng cửa sổ bằng nút X của hệ điều hành",
+    "toast.fsUnsupported": "Trình duyệt không cho bật toàn màn hình",
+    "toast.fsFailed": "Không bật được toàn màn hình",
+    "toast.notifyUnsupported": "Trình duyệt này không hỗ trợ thông báo desktop",
+    "toast.notifyOn": "Đã bật thông báo khi job kết thúc",
+    "toast.notifyPending": "Chưa nhận được quyền thông báo — hãy chấp nhận hộp thoại của trình duyệt",
+    "toast.notifyDenied": "Quyền thông báo bị từ chối — bật lại trong cài đặt trình duyệt",
+    "toast.notifyOff": "Đã tắt thông báo",
+    "toast.soundOn": "Đã bật âm báo",
+    "toast.soundOff": "Đã tắt âm báo",
+    "toast.interval": "Cập nhật mỗi {n} giây",
+    "toast.jobStarted": "Job bắt đầu",
+    "toast.jobDone": "Job hoàn tất",
+    "toast.jobFailed": "Job lỗi",
+    "toast.jobPaused": "Job tạm dừng",
+    "toast.jobResumed": "Job tiếp tục",
+
+    "notif.title": "Thông báo",
+    "notif.markRead": "Đánh dấu đã đọc",
+    "notif.clearAll": "Xoá tất cả",
+    "notif.empty": "Chưa có thông báo",
+    "notif.today": "Hôm nay",
+    "notif.earlier": "Trước đó",
+    "notif.bell": "Thông báo",
+    "notif.started": "bắt đầu",
+    "notif.finished": "hoàn tất",
+    "notif.failed": "lỗi",
+    "notif.paused": "tạm dừng",
+    "notif.resumed": "tiếp tục",
+    "notif.rated": "đánh giá",
+
+    "chart.noData": "Chưa có dữ liệu",
+    "chart.drawFailed": "Không vẽ được biểu đồ",
+    "chart.hourly": "Job theo giờ",
+    "chart.barAria": "biểu đồ cột",
+    "chart.hbarAria": "biểu đồ thanh",
+    "chart.donutAria": "biểu đồ tròn",
+    "chart.areaAria": "biểu đồ vùng",
+    "chart.scatterAria": "biểu đồ phân tán",
+    "chart.sparkAria": "sparkline",
+  };
+
+  const DICT = { en, vi };
+  const KEY = "oc-lang";
+  const listeners = [];
+
+  function detect() {
+    try {
+      const saved = localStorage.getItem(KEY);
+      if (saved === "en" || saved === "vi") return saved;
+    } catch { /* private mode */ }
+    return "vi";
+  }
+
+  let lang = detect();
+
+  function t(key, vars) {
+    const table = DICT[lang] || en;
+    let s = table[key];
+    if (s == null) s = en[key];
+    if (s == null) s = key;
+    if (vars) s = String(s).replace(/\{(\w+)\}/g, (m, k) => (vars[k] == null ? "" : String(vars[k])));
+    return s;
+  }
+
+  const locale = () => (lang === "vi" ? "vi-VN" : "en-US");
+
+  function num(value, opts) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "—";
+    try {
+      return new Intl.NumberFormat(locale(), opts || {}).format(n);
+    } catch {
+      return String(n);
+    }
+  }
+
+  function dec(value, digits) {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return "—";
+    try {
+      return new Intl.NumberFormat(locale(), {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: digits == null ? 1 : digits,
+      }).format(n);
+    } catch {
+      return String(n);
+    }
+  }
+
+  function compact(value) {
+    const n = Number(value) || 0;
+    if (n >= 1e9) return dec(n / 1e9, 1) + "B";
+    if (n >= 1e6) return dec(n / 1e6, 1) + "M";
+    if (n >= 1e3) return dec(n / 1e3, 1) + "k";
+    return num(n);
+  }
+
+  function date(value) {
+    const d = new Date(Number(value) || Date.now());
+    try {
+      return d.toLocaleString(locale(), {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+      });
+    } catch { return d.toISOString().slice(0, 16).replace("T", " "); }
+  }
+
+  function dateShort(value) {
+    const d = new Date(Number(value) || Date.now());
+    try {
+      return d.toLocaleDateString(locale(), { day: "2-digit", month: "2-digit", year: "numeric" });
+    } catch { return d.toISOString().slice(0, 10); }
+  }
+
+  function time(value, seconds) {
+    const d = new Date(Number(value) || Date.now());
+    try {
+      return d.toLocaleTimeString(locale(), {
+        hour: "2-digit", minute: "2-digit", second: seconds ? "2-digit" : undefined,
+        hourCycle: "h23",
+      });
+    } catch { return d.toTimeString().slice(0, seconds ? 8 : 5); }
+  }
+
+  function rel(value) {
+    const diff = Date.now() - Number(value || 0);
+    if (!Number.isFinite(diff) || diff < 0) return t("time.justNow");
+    const s = Math.round(diff / 1000);
+    if (s < 45) return t("time.justNow");
+    const m = Math.round(s / 60);
+    if (m < 60) return t("time.minAgo", { n: m });
+    const h = Math.round(m / 60);
+    if (h < 24) return t("time.hoursAgo", { n: h });
+    return t("time.daysAgo", { n: Math.round(h / 24) });
+  }
+
+  function applyStatic(root) {
+    const scope = root || document;
+    scope.querySelectorAll("[data-i18n]").forEach((el) => {
+      el.textContent = t(el.dataset.i18n);
+    });
+    scope.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      el.title = t(el.dataset.i18nTitle);
+    });
+    scope.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+      el.setAttribute("aria-label", t(el.dataset.i18nAria));
+    });
+    scope.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
+      el.placeholder = t(el.dataset.i18nPlaceholder);
+    });
+    scope.querySelectorAll("[data-i18n-label]").forEach((el) => {
+      el.dataset.label = t(el.dataset.i18nLabel);
+    });
+    document.documentElement.lang = lang;
+  }
+
+  function setLang(next) {
+    if (!DICT[next] || next === lang) {
+      if (DICT[next]) document.documentElement.lang = lang;
+      return;
+    }
+    lang = next;
+    try { localStorage.setItem(KEY, lang); } catch { /* private mode */ }
+    document.documentElement.lang = lang;
+    listeners.forEach((fn) => { try { fn(lang); } catch { /* ignore */ } });
+  }
+
+  function onChange(fn) {
+    if (typeof fn === "function") listeners.push(fn);
+  }
+
+  document.documentElement.lang = lang;
+
+  window.I18n = {
+    t, num, dec, compact, date, dateShort, time, rel, applyStatic, setLang, onChange, locale,
+    get lang() { return lang; },
+    dict: DICT,
+  };
+})();

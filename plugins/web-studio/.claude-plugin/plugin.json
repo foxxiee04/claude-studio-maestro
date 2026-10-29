@@ -1,0 +1,20 @@
+{
+  "name": "web-studio",
+  "version": "0.2.0",
+  "description": "Design and build web UIs the curated way: template gallery crawled from real sites, 3 design directions with live motion previews, premium motion recipes, animated icons, and an end-to-end /web-studio:design-web workflow that delegates coding through Maestro.",
+  "author": {
+    "name": "foxxiee"
+  },
+  "license": "MIT",
+  "keywords": [
+    "design",
+    "templates",
+    "motion",
+    "nextjs",
+    "shadcn",
+    "landing-page",
+    "dashboard"
+  ],
+  "homepage": "https://github.com/foxxiee04/claude-studio-maestro",
+  "repository": "https://github.com/foxxiee04/claude-studio-maestro"
+}
