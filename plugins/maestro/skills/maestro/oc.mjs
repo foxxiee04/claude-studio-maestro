@@ -56,7 +56,7 @@ const LEVELS = {
   "codex/gpt-6-luna": 4, "deepseek-v4.1-flash-free": 4, "glm-5.3-flash-free": 4, "antigravity/flash": 4,
   "claude/haiku": 3, "mimo-v2.6-flash-free": 3, "antigravity/flash_lite": 2,
   "antigravity/claude-opus-4-6-thinking": 5, "antigravity/claude-sonnet-4-6": 5, "antigravity/gemini-3.8-flash-high": 4,
-  "antigravity/gemini-3.8-flash-medium": 4, "antigravity/gemini-3.8-flash-low": 3, "antigravity/gpt-oss-120b-medium": 3,
+  "antigravity/gemini-3.8-flash-medium": 3, "antigravity/gemini-3.8-flash-low": 2, "antigravity/gpt-oss-120b-medium": 3,
 };
 
 function modelLevel(model) {
@@ -1505,6 +1505,11 @@ async function main() {
         console.log(`${pad(j.id, 38)} ${pad(j.status, 8)} ${pad(dur(t), 7)} ${pad(short(j.model), 28)} ${pad(j.kind || "", 5)} files=${j.filesTouched?.length || 0}${j.outOfScope?.length ? " !scope" : ""}${j.rating ? " " + j.rating : ""}  ${oneLine(j.lastActivity, 50)}`);
       }
       return 0;
+    }
+    case "selftest": {
+      // Syntax, CLI, provider rules, dashboard API and real clicks; no model calls, throwaway data folder.
+      const r = spawnSync(process.execPath, [path.join(SKILL_DIR, "selftest.mjs"), ...rest], { stdio: "inherit" });
+      return r.status ?? 1;
     }
     case "keys": {
       // API-key providers. Keys live in opencode's credential store; Maestro only keeps on/off + daily budget.

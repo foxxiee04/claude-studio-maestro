@@ -153,6 +153,13 @@ single-run test command in the brief.
 Outcome, jobs (model, status, time), files changed, validation evidence, open risks.
 Version-control publishing stays with the user: give them the commands, never run them.
 
+## Changing Maestro itself
+
+After any edit to oc.mjs, providers.mjs, limits.mjs, dash-web.mjs or web/*, run `OC selftest` (about 1 minute; no model
+calls, no money). It checks syntax, the main commands, provider/budget rules, every dashboard API route and, when
+playwright-core plus Edge/Chrome are available, real clicks on the bell, range buttons, sidebar, timeline and
+settings. Do not report Maestro changes as done while it fails.
+
 ## Known pitfalls (handled by oc.mjs)
 
 - opencode waits forever when stdin is open -> `oc` closes it. Calling `opencode run` by hand: add `< /dev/null`.

@@ -5,6 +5,20 @@ All notable changes to the `claude-studio` plugins (`maestro` and `web-studio`) 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2026-10-30
+
+### Added
+- `maestro selftest`: checks syntax, the main commands, provider/budget rules, every dashboard API route and, when
+  playwright-core plus Edge/Chrome are available, real clicks on the bell, range buttons, sidebar, timeline and
+  settings. No model calls, throwaway data folder. Verified to catch a reintroduced UI wiring bug.
+
+### Changed
+- Gemini levels: flash-high 4 (hard, code, ui), flash-medium 3 (code, ui), flash-low 2 (quick only), after the low
+  effort level left a large UI job half-done.
+
+### Removed
+- `agy-bridge.mjs` (the Antigravity CLI runner replaced it).
+
 ## [0.3.0] - 2026-10-29
 
 ### Added

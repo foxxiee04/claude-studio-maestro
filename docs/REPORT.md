@@ -1,4 +1,4 @@
-# Project report - claude-studio 0.2.0
+# Project report - claude-studio 0.3.1
 
 Date: 2026-10-29 · Author: foxxiee · Repository: https://github.com/foxxiee04/claude-studio-maestro
 
@@ -77,8 +77,20 @@ big-pickle and beam are undisclosed models; they are ranked by the hidden-test b
 - Pause/resume of very short jobs is hard to observe; it suspends the process tree on Windows (NtSuspendProcess).
 - web-studio's template crawler depends on the layout of third-party sites and may need updates.
 
-## 7. Next steps
+## 7. Follow-up (0.3.x)
+
+| Weak point found in review | Done |
+|---|---|
+| No automated tests for a large controller edited by many agents | `maestro selftest` (55 checks incl. real browser clicks); a reintroduced bug was caught |
+| Gemini low effort left a large UI job half-done | low effort limited to quick jobs; UI and hard jobs go to flash-high |
+| Settings lost when the browser clears site data | preferences saved server-side |
+| Timeline unreadable with many jobs | windows with navigation, capped rows and projects |
+| API keys | `maestro keys` + Settings > Providers, opt-in paid use with daily budgets |
+| macOS/Linux | code paths reviewed: pause uses SIGSTOP/SIGCONT, dashboard opens with `open`/`xdg-open`; not yet run on a real Mac/Linux machine |
+
+## 8. Next steps
 
 - Re-run the hidden-test bench on opencode models after their quota resets.
 - Antigravity: switch to command execution if a supported headless allow mechanism appears.
+- Test a paid provider with a real key (spend tracking relies on the cost opencode reports).
 - Cross-platform test of the setup script on macOS and Linux.

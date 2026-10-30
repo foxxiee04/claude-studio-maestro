@@ -18,6 +18,7 @@ Trong app Claude, Claude cũng mở tab "opencode jobs" ở **Terminal panel** (
 |---|---|
 | `maestro` (hoặc `maestro open`, `maestro dashboard`) | Mở **cửa sổ ứng dụng Maestro** (Edge, không tab, không thanh địa chỉ), tự bật server ngầm nếu chưa chạy |
 | `maestro close` | Tắt dashboard đang chạy ngầm |
+| `maestro selftest` | Tự kiểm tra Maestro sau khi sửa (cú pháp, lệnh, API dashboard, bấm thử nút); không gọi model |
 | `maestro status` | Dashboard có đang chạy không, pid, file log |
 | `maestro restart` | Chạy lại server ngầm (sau khi cập nhật giao diện) |
 | `maestro web --open` | Mở dashboard trong một tab trình duyệt |

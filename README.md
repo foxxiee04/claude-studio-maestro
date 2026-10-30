@@ -49,6 +49,7 @@ maestro models             # every model, its runner, tier, capability level and
 maestro limits             # how many jobs may run now (cores, free RAM, CPU, per-model caps)
 maestro doctor             # which agents, models and services this machine has
 maestro rate <job> good|bad          # your verdict feeds the ranking
+maestro selftest           # check Maestro after changing it (no model calls)
 ```
 
 ### Agents
